@@ -1,0 +1,28 @@
+#% text_encoding = iso8859_1 
+
+##
+## GIT HydroS Consult GmbH
+##
+## Copyright (C)  GIT HydroS Consult GmbH. 
+##                Freiburg, Germany.
+##                http://www.hydrosconsult.de  
+##                All Rights Reserved.
+##
+
+magikfan_session	1
+
+description
+	Load MagikFan modules
+end
+
+requires
+	magikfan_create_load_list
+	magikfan_abbreviation
+	magikfan_exercise_2
+end
+
+hidden
+
+
+
+

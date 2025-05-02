@@ -1,0 +1,196 @@
+#% text_encoding = iso8859_1
+_package user
+
+_pragma(classify_level=restricted)		
+_method object.pr
+	## Abbreviation for print(my_obj)
+	## Debug Method 
+	print(_self)
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_method object.dpr
+	## Abbreviation for debug_print(my_obj)
+	## Debug Method 
+	debug_print(_self)
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_method ds_collection.df
+	## Abbreviation for a_ds_collection.describe_fields()
+	## Debug Method 
+	_self.describe_fields()
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_method ds_record.df
+	## Abbreviation for a_ds_record.describe_fields()
+	## Debug Method 
+	_self.describe_fields()
+_endmethod
+$
+
+
+_method object.ae
+	## Abbreviation for an_element()
+	>> _self.an_element()
+_endmethod
+$
+
+
+_method object.pa
+	print_ancestry(_self)
+_endmethod
+$
+_method object.ph
+	print_hierarchy(_self)
+_endmethod
+$
+
+
+_global lfl << load_file_list
+$
+
+_global sp << smallworld_product
+$
+
+_global edm <<
+_proc@edm(_optional app_name)
+	l_app << app(app_name)
+	_return l_app.plugin(:editor_manager)
+_endproc
+$
+
+_global ed <<
+_proc@ed(_optional app_name)
+	_return edm(app_name).current_embedded_editor
+_endproc
+$
+
+
+_global mm <<
+_proc@mapman(_optional appname)
+	ap << app(appname)
+	_return ap.plugin(:maps)
+_endproc
+$
+
+_global cmv <<
+_proc@current_map_view(_optional app)
+	_local mapm << mm(app)
+	_return mapm.current_map_view
+_endproc
+$
+
+_pragma(classify_level=basic, topic={hash_table})
+_method dd_record_mixin.ed
+	## 
+	## Open Editor with self
+	_return edm().activate_editor_for_object(_self)
+_endmethod
+$
+
+_pragma(classify_level=basic, topic={hash_table})
+_method ds_collection.ed
+	## 
+	## Open Editor with self 
+	_return edm().activate_editor_for_collection(_self)	
+_endmethod
+$
+
+
+_pragma(classify_level=debug)
+_method smallworld_product.app()
+	##
+	## Returns Application with content filter
+
+	
+	_for i_app _over _self.applications.fast_elements()
+	_loop
+	
+		_if i_app.plugin(:map_manager) _isnt _unset
+		_then
+			_return i_app
+		_endif 
+	_endloop 
+_endmethod
+$
+
+_global app <<
+_proc@app()
+	_local app << smallworld_product.app()
+	_return app
+_endproc
+$
+
+
+_global magikfan_print_dyn_var <<
+_proc@magikfan_print_dyn_var()
+	_for i_key, i_value _over _thisthread.vm_dynamic_environment.keys_and_values()
+	_loop
+		write(write_string(i_key.key, ": ", i_value))		
+	_endloop
+_endproc 
+$
+_global magikfan_print_dyn_var_detail <<
+_proc@magikfan_print_dyn_var_detail()
+	_for i_key, i_value _over _thisthread.vm_dynamic_environment.keys_and_values()
+	_loop
+		write(write_string("***** ", i_key.key, ": ", i_value))
+		print(i_value)
+		write(newline_char)
+	_endloop
+_endproc 
+$
+
+
+_global v <<
+_proc@v(p_name)
+	_return gis_program_manager.cached_dataset(p_name.as_symbol())
+_endproc 
+$
+
+
+_global serialise <<
+_proc@serialise(p_product_name)
+	_local l_product
+	l_product << smallworld_product.product(p_product_name.as_symbol())
+	l_product.reinitialise()
+	l_product.save_serialised_module_definitions()
+_endproc
+$
+
+_global compile <<
+_proc@compile(p_product_name)
+	_local l_product
+	l_product << smallworld_product.product(p_product_name.as_symbol())
+	l_product.compile_all_modules(_unset, _unset, _unset, _true)
+_endproc
+$
+_global decompile <<
+_proc@decompile(p_product_name)
+	system.rmdir(system.pathname_from_components("libs", smallworld_product.product(p_product_name).directory))
+_endproc
+$
+
+_global reset_db_context <<
+_proc@reset_db_context()
+	l_dir << system.getenv(:sw_db_context_dir)
+	l_dc << directory_channel.new(l_dir)
+	_loop
+		l_file << l_dc.get()
+		_if l_file _is _unset
+		_then
+			_leave
+		_endif
+		system.unlink(system.pathname_from_components(l_file, l_dir))
+	_endloop 
+	smallworld_product.save_database_context( system.getenv(:sw_db_context_dir) )
+_endproc
+$
+
+
+

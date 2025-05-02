@@ -1,0 +1,200 @@
+#% text_encoding = iso8859_1
+_package sw
+
+_pragma(classify_level=restricted)
+##
+##
+def_slotted_exemplar(:magikfan_create_load_list,
+        {
+	},
+	{})
+$
+
+
+_pragma(classify_level=restricted)
+_method magikfan_create_load_list.create_load_list(p_directory)
+	##
+	## Creates new load_list entries for p_directory and all
+	## subdirectories 	
+	## 
+	_self.int!create_load_list(p_directory, _false)
+_endmethod
+$
+
+
+_pragma(classify_level=restricted)
+_method magikfan_create_load_list.parent_folder_with_module_def?(p_directory)
+	## 
+	## 
+	l_file << system.pathname_from_components("module.def",
+						  p_directory)
+	_if system.file_exists?(l_file)
+	_then
+		_return _true
+	_endif
+	l_dir << system.pathname_up(p_directory)
+	_if l_dir _is _unset _orif
+	    l_dir = p_directory
+	_then
+		_return _false
+	_endif
+	_return _self.parent_folder_with_module_def?(l_dir)
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_method magikfan_create_load_list.verify_load_list(p_directory,
+						   p_dir_vec,
+						   p_file_vec)
+	## 
+	## 
+	l_content << ""
+	l_dir_set << equality_set.new_from(p_dir_vec)
+	l_file_set << equality_set.new_from(p_file_vec)
+	l_load_file_list << system.pathname_from_components("load_list.txt", p_directory)
+	# Create new if no file_list exists
+	_if system.file_exists?(l_load_file_list) _is _false
+	_then
+		l_output << external_text_output_stream.new(l_load_file_list)
+		l_output.close()
+	_endif 
+	l_input << external_text_input_stream.new(l_load_file_list)
+	_protect
+		_loop @line
+			l_line << l_input.get_line()
+			_if l_line _is _unset
+			_then
+				_leave
+			_endif
+		
+			l_filename << system.pathname_from_components(l_line,
+								      p_directory)
+			_for i_extension _over {"",
+						"magik"}.fast_elements()
+			_loop
+				_if i_extension.size > 0
+				_then
+					l_test_filename << l_filename + "." + i_extension
+				_else
+					l_test_filename << l_filename
+				_endif 
+				_if system.file_exists?(l_test_filename)
+				_then
+					l_content +<< l_line + newline_char
+					l_file_set.remove(l_line)
+					l_file_set.remove(l_line + ".magik")
+					l_dir_set.remove(l_line.slice(1, l_line.size - 1))
+					_continue @line
+				_endif 
+			_endloop
+			_if l_line.size > 1 
+			_then
+				l_test_filename << l_filename.slice(1, l_filename.size -1)
+				_if system.file_exists?(l_test_filename)
+				_then
+					l_content +<< l_line + newline_char
+					l_dir_name << l_line.slice(1, l_line.size - 1)
+					l_dir_set.remove(l_dir_name)
+					_continue @line
+				_endif
+			_endif 
+
+			l_with_unset_line? << _true 
+			write(write_string("Line REMOVED from load_list.txt in file:", newline_char,
+					   l_load_file_list, newline_char,
+					   "Removed Line:", newline_char,
+					   l_line))
+		_endloop 
+	_protection
+		l_input.close()
+	_endprotect
+	l_add_vec << rope.new()
+	_for i_dir _over p_dir_vec.fast_elements()
+	_loop
+		_if l_dir_set.includes?(i_dir)
+		_then 
+			l_content << write_string(i_dir, "/", newline_char, l_content)
+			l_add_vec.add(write_string(i_dir, "/"))
+		_endif 
+	_endloop
+	_for i_file _over p_file_vec.fast_elements()
+	_loop
+		_if l_file_set.includes?(i_file)
+		_then 
+			(l_file, l_extension) << system.split_filename(i_file)
+			l_content +<< write_string(l_file, newline_char)
+			l_add_vec.add(write_string(l_file))
+		_endif 
+	_endloop
+	_if _not l_add_vec.empty?
+	_then
+		write(write_string("Following lines ADDED to load_list.txt in file:", newline_char,
+				   l_load_file_list))
+		_for i_add _over l_add_vec.fast_elements()
+		_loop
+			write(i_add)
+		_endloop
+	_endif 
+	l_output << external_text_output_stream.new(l_load_file_list)
+	_protect
+		l_output.write(l_content)		   
+	_protection
+		l_output.close()
+	_endprotect
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_method magikfan_create_load_list.int!create_load_list(p_directory, p_with_module_def?)
+	## 
+	## 
+	l_dir_channel << directory_channel.new(p_directory )
+	l_file_vec << rope.new()
+	l_dir_vec << rope.new()
+	l_full_dir_vec << rope.new()
+	_protect 
+		# suche message files
+		_loop 
+			_if (l_full_file << l_dir_channel.get_full()) _is _unset
+			_then
+				_leave
+			_endif
+			l_file << system.pathname_components(l_full_file)
+			_if l_file = "resources"
+			_then
+				_continue
+			_endif 
+			l_file_status << file_status.new(l_full_file)
+		
+			_if l_file_status.basic_type _is :directory
+			_then
+				l_full_dir_vec.add(l_full_file)
+				l_dir_vec.add(l_file)
+			_else
+				(l_file_name, l_extension) << system.split_filename(l_file)
+				_if l_extension = "magik"
+				_then 
+					l_file_vec.add(l_file)
+				_endif 
+			_endif
+		_endloop
+	_protection
+		l_dir_channel.close()
+	_endprotect
+	_if p_with_module_def? _is _false _andif
+	    _self.parent_folder_with_module_def?(p_directory)
+	_then
+		p_with_module_def? << _true 
+	_endif
+	_for i_dir _over l_full_dir_vec.fast_elements()
+	_loop
+		_self.int!create_load_list(i_dir, p_with_module_def?)
+	_endloop
+	_if p_with_module_def? _is _true
+	_then 
+		_self.verify_load_list(p_directory, l_dir_vec, l_file_vec)
+	_endif 
+_endmethod
+$
+
+

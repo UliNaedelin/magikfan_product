@@ -1,0 +1,233 @@
+#% text_encoding = iso8859_1
+_package sw
+
+#> Erster Teil
+
+_pragma(classify_level=restricted)
+_method simple_vector.magikfan!elements_in_between(p_min, p_max)
+	## 
+	## Return a rope with all numbers within P_MIN <= x <= P_MAX.
+	## self has to contain numbers only
+	##
+	## {2, 5, 7, 9, 10}.magikfan!elements_in_between(5, 9)
+	## -> {5, 7, 9}
+	l_res_vec << rope.new()
+	_for i_number _over _self.fast_elements()
+	_loop
+		# Ändere _true um Prüfung, ob p_min <= i_number <= p_max
+		# Benutze _andif
+		_if _true
+		_then
+			l_res_vec.add(i_number)
+		_endif 
+	_endloop 
+	_return l_res_vec
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_method simple_vector.magikfan!write_element_with_position()
+	## 
+	## Write element with position to output in following struture:
+	##
+	## {10, 4} ->
+	## 1: 10
+	## 2: 4
+	_for i_position, i_object _over _self.fast_keys_and_elements()
+	_loop
+		write("", ": ", "")
+	_endloop	
+_endmethod
+$
+
+
+_pragma(classify_level=restricted)
+_method simple_vector.magikfan!find_position_of_element(p_object)
+	## 
+	## Return first found position of element P_OBJECT. Compare by equality.
+	##
+	## {10, "hallo", :hallo}.magikfan!find_position_of_element("hallo") -> 2
+	_for i_position, i_object _over _self.fast_keys_and_elements()
+	_loop
+
+	_endloop 
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_method simple_vector.magikfan!find_all_positions_of_element(p_object)
+	## 
+	## Return all found positions as rope for element
+	## P_OBJECT. Compare by equality.
+	##
+	## {10, "hallo", :hallo}.magikfan!find_all_positions_of_element("hallo") -> {2, 3}
+	l_res_vec << rope.new()
+	_for i_position, i_object _over _self.fast_keys_and_elements()
+	_loop
+
+	_endloop
+	_return l_res_vec
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_method char16_vector.magikfan!uppercase_letters()
+	## 
+	## Return new char16_vector with capital letters
+	##
+	## Example: "Hello" -> "HELLO"
+	l_uppercase_string << char16_vector.new(_self.size)
+	_for i_position, i_character _over _self.fast_keys_and_elements()
+	_loop
+		# Verwende: i_character.uppercase
+	_endloop
+	_return l_uppercase_string
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_method char16_vector.magikfan!uppercase_letters_in_situ()
+	## 
+	## Change all characters of self to capital letters
+	##
+	## Example: "Hello" -> "HELLO"
+	_for i_position, i_character _over _self.keys_and_elements()
+	_loop
+		# Verwende: i_character.uppercase
+	_endloop
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_method char16_vector.magikfan!get_uppercase_letters()
+	## 
+	## Return a new string containing all uppercase letters
+	## Example: "HeLLo" -> "HLL"
+	l_uppercase_string << ""
+	# Verwende: Wenn i_character.uppercase? -> l_uppercase_string +<< i_character
+
+	_return l_uppercase_string
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_method char16_vector.magikfan!reverse_characters()
+	## 
+	## Return a new string containing reverse characters
+	## Example: "HeLLo" -> "oLLeH"
+	l_reverse_string << ""
+	_for i_character _over _self.elements_in_reverse()
+	_loop
+
+	_endloop 
+	_return l_reverse_string
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_method simple_vector.magikfan!as_property_list()
+	## 
+	## Return a property list with every element in odd position as key and
+	## element at even position as value.
+	##
+	## {:january, 31, :february, 28} -> property_list[:january] << 31
+	##                                               [:february] << 28
+	l_res_prop << property_list.new()
+	# Drittes Argument von range ist der
+	# Inkrementierungswert (optional, per Default 1)
+	_for i_position _over range(1, _self.size, 2)
+	_loop
+		
+	_endloop
+	_return l_res_prop
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_method simple_vector.magikfan!element_at_position(p_position)
+	## 
+	## Return element at P_POSITION. In case P_POSITION is bigger
+	## than selfs size, unset is returned.
+	# Verwende _if um p_position > _self.size wie gewünscht zu behandeln.
+
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_method simple_vector.magikfan!element_at_position_with_try(p_position)
+	##
+	## Return element at P_POSITION. In case P_POSITION is bigger
+	## than selfs size, unset is returned.
+	# Verwende _try um p_position > _self.size wie gewünscht zu behandeln.
+	# Ermittle die condition durch Ausführung im GIS-Prompt: {10}[2]
+
+_endmethod
+$
+
+#> Zweiter Teil
+
+
+_global magikfan!fibonacci_numbers <<  _iter _proc()
+						     ## Iterates over Fibonacci numbers. Handle with care, iterator
+						     ## has no limit
+						     _loopbody(s1 << 1)
+						     _loopbody(s2 << 1)
+						     _loop
+							     _loopbody(t << s1 + s2)
+							     s1 << s2
+							     s2 << t
+						     _endloop
+					     _endproc
+$
+
+_global magikfan!write_fibonacci << _proc(p_max_number)
+					    ## Write all Fibonacci numbers until P_MAX_NUMBER
+					    ##
+					    ## magikfan!write_fibonacci(9) ->
+					    ## 1
+					    ## 1
+					    ## 2
+					    ## 3
+					    ## 5
+					    ## 8
+					    # Verwende Prozedur magikfan!fibonacci_numbers()
+					    # Implementierung benötigt ein _leave, so Fibonacci Zahl größer
+					    # ist als p_max_number
+					    # Ausgabe der Zahlen in Prompt über write(i_number)
+					  
+				    _endproc
+
+_pragma(classify_level=restricted)
+_method integer.magikfan!write_fibonacci()
+	## 
+	## Write all fibonacci numbers smaller than self
+	##
+	# Verwende Prozedur magikfan!write_fibonacci()
+	
+_endmethod
+$
+
+
+_pragma(classify_level=restricted)
+_method integer.magikfan!fibonacci_number?()
+	## 
+	## Return true in case self is a fibonacci number, else false
+	##
+	## 8.magikfan!fibonacci_number?() -> _true
+	## 9.magikfan!fibonacci_number?() -> _false
+	# Verwende Prozedur magikfan!fibonacci_numbers()
+	
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_method integer.magikfan!highest_valid_fibonacci_number()
+	## 
+	## Return the highest number within range up to self.
+	##
+	## 8 -> 8
+	## 9 -> 8
+	# Verwende Prozedur magikfan!fibonacci_numbers()
+	
+_endmethod
+$

@@ -1,0 +1,9 @@
+#% text_encoding = iso8859_1
+_package sw
+
+
+_global create_load_list <<
+	_proc(p_directory)
+		magikfan_create_load_list.create_load_list(p_directory)
+	_endproc
+$
