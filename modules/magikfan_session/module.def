@@ -19,6 +19,7 @@ requires
 	magikfan_create_load_list
 	magikfan_abbreviation
 	magikfan_exercise_2
+	magikfan_exercise_3
 end
 
 hidden

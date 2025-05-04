@@ -1,0 +1,38 @@
+#% text_encoding = iso8859_1
+_package sw
+##----------------------------------------------------------------------
+##
+##> Name:         magikfan_pa_proc.magik
+##
+
+##-
+##----------------------------------------------------------------------
+
+
+_global magikfan_pa_string_reversed <<
+	_proc ()
+		##
+		## Procedure measures duration of  reversing string "Das ist ein schöner
+		## Tag" by default method reversed() for 3000 times.	
+		##
+		l_test_string << "Das ist ein schöner Tag"
+
+		_return magikfan_pa_measure_and_protocol_proc(l_test_string, :|reversed()|, 3000)	
+	_endproc
+$
+
+
+
+
+_global magikfan_pa_string_my_reversed <<
+	_proc ()
+		##
+		## Procedure measures duration of  reversing string "Das ist ein schöner
+		## Tag" by own method magikfan_reversed() for 3000 times.	
+		##
+		l_test_string << "Das ist ein schöner Tag"
+
+		_return magikfan_pa_measure_and_protocol_proc(l_test_string, :|magikfan_reversed()|, 3000)	
+	_endproc
+$
+

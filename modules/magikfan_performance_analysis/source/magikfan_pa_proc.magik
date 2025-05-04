@@ -1,0 +1,125 @@
+#% text_encoding = iso8859_1
+_package sw
+##----------------------------------------------------------------------
+##
+##> Name:         magikfan_pa_proc.magik
+##
+
+##-
+##----------------------------------------------------------------------
+
+
+_global magikfan_pa_measure_proc <<
+	_proc (p_object, p_method_name, _optional p_numb_execution, _gather p_arg_vec)
+		##
+		## Procedure to measure time of a certain operation.
+		## Returns measured time-span and result of operation
+		##
+		l_start_time << system.elapsed_seconds()
+		
+		p_numb_execution << p_numb_execution.default(1)
+		l_result_vec << simple_vector.new(p_numb_execution)
+		_for i _over range(1, p_numb_execution)
+		_loop 
+			l_result_vec[i] << _allresults p_object.perform(p_method_name, _scatter p_arg_vec)
+		_endloop 
+			
+		l_end_time << system.elapsed_seconds()
+		l_time_span << l_end_time - l_start_time
+		_return l_time_span, l_result_vec		
+	_endproc
+$
+
+
+
+			    
+_global magikfan_pa_measure_and_protocol_proc <<
+_proc (p_object, p_method_name, _optional p_numb_execution, _gather p_arg_vec)
+	##
+	## Procedure calls proc magikfan_pa_measure_proc and writes
+	## result in file c:\time.txt.
+	##
+	## Returns result of method p_method_name
+	(l_time_span,
+	 l_result_of_method) << magikfan_pa_measure_proc(p_object,
+							 p_method_name,
+							 p_numb_execution,
+							 _scatter p_arg_vec)
+
+	l_file << external_text_output_stream.new("c:\time.txt")
+	_protect 
+		l_file.write(date_time.now(),
+			     ";",
+			     l_time_span.write_string,
+			     ";",
+			     p_object.write_string,
+			     ";",
+			     p_method_name.write_string,
+			     newline_char
+		       )
+	_protection
+		l_file.close()
+	_endprotect 
+	_return l_time_span, l_result_of_method
+	
+_endproc
+$
+
+
+_global magikfan_pa_measure_and_protocol_each_call_proc <<
+_proc (p_object, p_method_name, _optional p_numb_execution, _gather p_arg_vec)
+	##
+	## Procedure calls proc magikfan_pa_measure_proc and writes
+	## result in file c:\time.txt.
+	##
+	## Returns result of method p_method_name
+
+	l_file << external_text_output_stream.new("c:\time.txt")
+	_protect 
+	
+
+		(l_result_of_method) << magikfan_pa_measure_each_call_proc(l_file,
+								 p_object,
+								 p_method_name,
+								 p_numb_execution,
+								 _scatter p_arg_vec)
+
+	_protection
+		l_file.close()
+	_endprotect 
+	_return l_result_of_method
+	
+_endproc
+$
+
+_global magikfan_pa_measure_each_call_proc <<
+	_proc (p_file, p_object, p_method_name, _optional p_numb_execution, _gather p_arg_vec)
+		##
+		## Procedure to measure time of a certain operation.
+		## Returns measured time-span and result of operation
+		##
+	
+		
+		p_numb_execution << p_numb_execution.default(1)
+		_for i _over range(1, p_numb_execution)
+		_loop
+			l_start_time << system.elapsed_seconds()
+			l_result << p_object.perform(p_method_name, _scatter p_arg_vec)
+
+			l_end_time << system.elapsed_seconds()
+			l_time_span << l_end_time - l_start_time
+			p_file.write(date_time.now(:milliseconds),
+				     ";",
+				     l_time_span.write_string,
+				     ";",
+				     p_object.write_string,
+				     ";",
+				     p_method_name.write_string,
+				     newline_char
+			       )			
+		_endloop 
+	
+		_return l_result
+		
+	_endproc
+$

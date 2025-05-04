@@ -1,0 +1,7 @@
+_block
+	_local l_dir
+	_local l_product
+	l_dir << "C:\git\sw52\magikfan_product"
+	smallworld_product.add_product(l_dir)
+	sw_module_manager.load_module(:magikfan_session)
+_endblock 

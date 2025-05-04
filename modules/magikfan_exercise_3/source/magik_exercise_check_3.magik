@@ -1,0 +1,88 @@
+#% text_encoding = iso8859_1
+_package sw
+
+_pragma(classify_level=restricted)
+def_slotted_exemplar(
+	:magik_exercise_check_3,
+	{
+	},
+	{})
+$
+
+_pragma(classify_level=restricted)
+_method magik_exercise_check_3.new()
+	## 
+	## 
+	_return _clone.init()
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_method magik_exercise_check_3.init()
+	## 
+	## 
+	_return _self 
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_method magik_exercise_check_3.test_run()
+	## 
+	##
+	l_dir << sw_module_manager.module(:m_waste_water_data_model).full_directory
+	l_file << system.pathname_down(l_dir,
+				       "exemplars",
+				       "aw_haltung.magik")
+
+	l_file_analysis << magikfan_code_file_analysis.new(l_file)
+
+	write("Analysis of file ", l_file, " by class magikfan_code_file_analysis")
+	l_line_number << l_file_analysis.number_of_lines()
+	write("Number of lines (number_of_lines()): ", l_line_number)
+	l_method_number << l_file_analysis.number_of_methods()
+	write("Number of method lines (number_of_methods()): ", l_method_number)
+	write("All public comments (write_public_commments): ")
+	l_file_analysis.write_public_comments()
+_endmethod
+$
+
+
+_pragma(classify_level=restricted)
+_method magik_exercise_check_3.test_run_statistics()
+	## 
+	##
+	l_dir << sw_module_manager.module(:m_waste_water_data_model).full_directory
+	l_file << system.pathname_down(l_dir,
+				       "exemplars",
+				       "aw_haltung.magik")
+
+	l_file_analysis << magikfan_code_file_analysis.new(l_file)
+
+	write("Analysis of file ", l_file, " by class magikfan_code_file_analysis")
+
+	write("Method statistics (method_statistics()): ")
+	l_file_analysis.write_method_statistics()
+_endmethod
+$
+
+
+_pragma(classify_level=restricted)
+_method magik_exercise_check_3.test_run_number_of_return_lines()
+	## 
+	##
+	l_dir << sw_module_manager.module(:m_waste_water_data_model).full_directory
+	l_file << system.pathname_down(l_dir,
+				       "exemplars",
+				       "aw_haltung.magik")
+
+	l_file_analysis << magikfan_code_file_analysis.new(l_file)
+
+	write("Analysis of file ", l_file, " by class magikfan_code_file_analysis")
+
+	write("Methods without return values (write_methods_with_number_of_return_lines(0, 0)): ")
+	l_file_analysis.write_methods_with_number_of_return_lines(0, 0)
+
+	write("Methods with 3 or more return values (write_methods_with_number_of_return_lines(3)): ")
+	l_file_analysis.write_methods_with_number_of_return_lines(3)
+_endmethod
+$

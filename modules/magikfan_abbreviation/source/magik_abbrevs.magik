@@ -58,9 +58,9 @@ _global sp << smallworld_product
 $
 
 _global edm <<
-_proc@edm(_optional app_name)
-	l_app << app(app_name)
-	_return l_app.plugin(:editor_manager)
+_proc@edm()
+	l_app << app()
+	_return l_app.get_service_provider(:editor_manager)
 _endproc
 $
 
@@ -72,9 +72,9 @@ $
 
 
 _global mm <<
-_proc@mapman(_optional appname)
-	ap << app(appname)
-	_return ap.plugin(:maps)
+_proc@mapman()
+	ap << app()
+	_return ap.get_service_provider(:map_manager)
 _endproc
 $
 
@@ -110,11 +110,7 @@ _method smallworld_product.app()
 	
 	_for i_app _over _self.applications.fast_elements()
 	_loop
-	
-		_if i_app.plugin(:map_manager) _isnt _unset
-		_then
-			_return i_app
-		_endif 
+		_return i_app.get_service_provider(:map_manager)
 	_endloop 
 _endmethod
 $

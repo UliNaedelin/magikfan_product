@@ -1,0 +1,286 @@
+#% text_encoding = iso8859_1
+_package sw
+
+_pragma(classify_level=restricted)
+def_slotted_exemplar(
+	:magikfan_code_file_analysis,
+	{
+		{:filename, _unset}
+	},
+	{})
+$
+
+_pragma(classify_level=basic)
+_method magikfan_code_file_analysis.new(p_filename)
+	## 
+	## 
+	_return _clone.init(p_filename)
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_private _method magikfan_code_file_analysis.init(p_filename)
+	## 
+	## 
+	.filename << p_filename
+	_return _self 
+_endmethod
+$
+
+
+_pragma(classify_level=basic)
+_method magikfan_code_file_analysis.number_of_lines()
+	## 
+	## Number of lines in file
+	l_number << 0
+	_for i_line _over _self.lines()
+	_loop
+		l_number +<< 1
+	_endloop
+	_return l_number	
+_endmethod
+$
+
+
+_pragma(classify_level=basic)
+_method magikfan_code_file_analysis.number_of_methods()
+	## 
+	## Number of methods in file
+	l_number << 0
+	_for i_line _over _self.method_lines()
+	_loop
+		l_number +<< 1
+	_endloop
+	_return l_number
+_endmethod
+$
+
+_pragma(classify_level=basic)
+_method magikfan_code_file_analysis.write_public_comments()
+	## 
+	## Writes all public comments to command prompt
+	# Use _self.lines(), _self.is_public_comment?() and write(i_line)
+	
+_endmethod
+$
+
+_pragma(classify_level=basic)
+_method magikfan_code_file_analysis.write_method_statistics()
+	## 
+	## Write all methods in file with statistics
+	l_prop << _self.method_statistics()
+	_for i_method, i_line_prop _over l_prop.fast_keys_and_elements()
+	_loop
+		write("Method: ", i_method)
+		write("Number lines: ", i_line_prop[:lines].size)
+		write("Number return lines: ", i_line_prop[:return_lines].size)
+		write("Public comments:")
+		_for i_line _over i_line_prop[:public_comments].fast_elements()
+		_loop
+			write(i_line)
+		_endloop
+		write("Internal comments:")
+		_for i_line _over i_line_prop[:internal_comments].fast_elements()
+		_loop
+			write(i_line)
+		_endloop 
+	_endloop 
+_endmethod
+$
+
+
+_pragma(classify_level=basic)
+_method magikfan_code_file_analysis.write_methods_with_number_of_return_lines(_optional p_min_number, p_max_number)
+	##
+	## Writes methods with at least P_MIN_NUMBER and up to
+	## P_MAX_NUMBER return lines
+	##
+	## Default value of P_MIN_NUMBER and P_MAX_NUMBER see comment
+	## of method methods_with_number_of_return_lines() 
+	## 
+	l_prop << _self.methods_with_number_of_return_lines(p_min_number)
+	_self.write_methods_with_return_line(l_prop)
+_endmethod
+$
+
+_pragma(classify_level=advanced)
+_method magikfan_code_file_analysis.method_statistics()
+	## 
+	## Evaluate all methods in file and classify line types within method
+	l_prop << concurrent_hash_map.new()
+	l_in_method? << _false 
+	_for i_line _over _self.lines()
+	_loop
+		_if _not l_in_method?
+		_then 
+			_if _self.is_method_start_line?(i_line)
+			_then
+				l_in_method? << _true
+				l_method_name << _self.method_name(i_line)
+				l_method_prop <<  property_list.new_with(
+							  :lines, rope.new(),
+							  :public_comments, rope.new(),
+							  :internal_comments, rope.new(),
+							  :return_lines, rope.new()
+								)
+				l_prop[l_method_name.as_symbol()] << l_method_prop
+			_endif
+		_else
+			_if _self.is_method_end_line?(i_line)
+			_then
+				l_in_method? << _false
+				_continue 
+			_endif
+			l_method_prop[:lines].add(i_line)
+			_if _self.is_internal_comment?(i_line)
+			_then
+				l_method_prop[:internal_comments].add(i_line)
+			_endif
+			_if _self.is_public_comment?(i_line)
+			_then
+				l_method_prop[:public_comments].add(i_line)
+			_endif
+			_if _self.is_return_line?(i_line)
+			_then
+				l_method_prop[:return_lines].add(i_line)
+			_endif
+		_endif 
+	_endloop
+	_return l_prop
+_endmethod
+$
+
+_pragma(classify_level=advanced)
+_method magikfan_code_file_analysis.methods_with_number_of_return_lines(_optional p_min_number, p_max_number)
+	## 
+	## Returns a method - line_prop - property list with methods
+	## having at least P_MIN_NUMBER and up to P_MAX_NUMBER return lines
+	##
+	## Default value of P_MIN_NUMBER = 2
+	## Default value of P_MAX_NUBMER = no upper limit
+	l_result_prop << property_list.new()
+	l_prop << _self.method_statistics()
+	p_min_number << p_min_number.default(2)
+	_for i_method, i_line_prop _over l_prop.fast_keys_and_elements()
+	_loop
+		
+	_endloop
+	_return l_result_prop
+_endmethod
+$
+
+
+_pragma(classify_level=restricted)
+_private _iter _method magikfan_code_file_analysis.lines()
+	## 
+	## Iterate over all lines in file
+	l_input << external_text_input_stream.new(.filename)
+	_protect 
+		_loop
+			l_line << l_input.get_line()
+			_if l_line _is _unset
+			_then
+				_leave 
+			_endif
+			_loopbody(l_line)
+		_endloop
+	_protection
+		l_input.close()
+	_endprotect 
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_private _iter _method magikfan_code_file_analysis.method_lines()
+	## 
+	## Iterate over all lines starting a method
+	_for i_line _over _self.lines()
+	_loop
+		_if _self.is_method_start_line?(i_line)
+		_then
+			_loopbody(i_line)
+		_endif 
+	_endloop	
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_private _method magikfan_code_file_analysis.is_method_start_line?(p_line)
+	## 
+	## If p_line starts with %_ and includes "_method "
+	# "_private _method integer.test()".matches?("*_method *")
+	
+	_if p_line.empty?
+	_then
+		_return _false
+	_endif
+	
+	_return _false 
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_private _method magikfan_code_file_analysis.is_method_end_line?(p_line)
+	## 
+	## If p_line starts includes "_endmethod"
+	# "_endmethod".matches?("_endmethod*")
+	
+	_return _false 
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_private _method magikfan_code_file_analysis.is_internal_comment?(p_line)
+	## 
+	## Lines beginning with "#" and are not public comment
+	# "    #  Test ".trim_spaces() -> "#  Test"
+
+	_return _false 
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_private _method magikfan_code_file_analysis.is_public_comment?(p_line)
+	## 
+	## Lines beginning with "##"
+	# "    ##  Test ".trim_spaces() -> "##  Test"
+	
+	_return _false 
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_private _method magikfan_code_file_analysis.is_return_line?(p_line)
+	## 
+	## Lines beginning with "_return"
+	# "    _return l_result".trim_spaces() -> "_return l_result".matches?("_return*")
+	
+	_return _false 
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_private _method magikfan_code_file_analysis.method_name(p_line)
+	## 
+	## 
+	_if _self.is_method_start_line?(p_line)
+	_then
+		_return p_line.split_by(%.).last.split_by(%().first
+	_endif 
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_private _method magikfan_code_file_analysis.write_methods_with_return_line(p_method_line_prop)
+	## 
+	## 
+	_for i_method, i_line_prop _over p_method_line_prop.fast_keys_and_elements()
+	_loop
+		write(i_method, ": ", i_line_prop[:return_lines].size)
+		_for i_line _over i_line_prop[:return_lines].fast_elements()
+		_loop
+			write("   - ", i_line.trim_spaces())
+		_endloop 
+	_endloop 
+_endmethod
+$
