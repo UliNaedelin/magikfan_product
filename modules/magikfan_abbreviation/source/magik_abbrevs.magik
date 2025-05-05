@@ -57,6 +57,15 @@ $
 _global sp << smallworld_product
 $
 
+
+_global app <<
+_proc@app()
+	_local app << smallworld_product.app()
+	_return app
+_endproc
+$
+
+
 _global edm <<
 _proc@edm()
 	l_app << app()
@@ -115,12 +124,6 @@ _method smallworld_product.app()
 _endmethod
 $
 
-_global app <<
-_proc@app()
-	_local app << smallworld_product.app()
-	_return app
-_endproc
-$
 
 
 _global magikfan_print_dyn_var <<
