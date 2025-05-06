@@ -60,7 +60,13 @@ _method magikfan_code_file_analysis.write_public_comments()
 	## 
 	## Writes all public comments to command prompt
 	# Use _self.lines(), _self.is_public_comment?() and write(i_line)
-	
+	_for i_line _over _self.lines()
+	_loop
+		_if _self.is_public_comment?(i_line)
+		_then 
+			write(i_line)
+		_endif 
+	_endloop 
 _endmethod
 $
 
@@ -163,7 +169,13 @@ _method magikfan_code_file_analysis.methods_with_number_of_return_lines(_optiona
 	p_min_number << p_min_number.default(2)
 	_for i_method, i_line_prop _over l_prop.fast_keys_and_elements()
 	_loop
-		
+		l_number_return_lines << i_line_prop[:return_lines].size
+		_if l_number_return_lines >= p_min_number _andif
+		    (p_max_number _is _unset _orif
+		     l_number_return_lines <= p_max_number)
+		_then
+			l_result_prop[i_method] << i_line_prop
+		_endif 
 	_endloop
 	_return l_result_prop
 _endmethod
@@ -209,13 +221,9 @@ _private _method magikfan_code_file_analysis.is_method_start_line?(p_line)
 	## 
 	## If p_line starts with %_ and includes "_method "
 	# "_private _method integer.test()".matches?("*_method *")
-	
-	_if p_line.empty?
-	_then
-		_return _false
-	_endif
-	
-	_return _false 
+	_return _not p_line.empty? _andif 
+		p_line[1] _is %_ _andif
+		p_line.matches?("*_method *")
 _endmethod
 $
 
@@ -224,8 +232,7 @@ _private _method magikfan_code_file_analysis.is_method_end_line?(p_line)
 	## 
 	## If p_line starts includes "_endmethod"
 	# "_endmethod".matches?("_endmethod*")
-	
-	_return _false 
+	_return p_line.matches?("_endmethod*")
 _endmethod
 $
 
@@ -234,8 +241,11 @@ _private _method magikfan_code_file_analysis.is_internal_comment?(p_line)
 	## 
 	## Lines beginning with "#" and are not public comment
 	# "    #  Test ".trim_spaces() -> "#  Test"
-
-	_return _false 
+	l_line << p_line.trim_spaces()
+	
+	_return _not l_line.empty? _andif
+		l_line[1] _is %# _andif
+		_not _self.is_public_comment?(l_line)
 _endmethod
 $
 
@@ -244,8 +254,10 @@ _private _method magikfan_code_file_analysis.is_public_comment?(p_line)
 	## 
 	## Lines beginning with "##"
 	# "    ##  Test ".trim_spaces() -> "##  Test"
-	
-	_return _false 
+	l_line << p_line.trim_spaces()
+	_return l_line.size > 1 _andif
+		l_line[1] _is %# _andif
+		l_line[2] _is %#
 _endmethod
 $
 
@@ -254,8 +266,8 @@ _private _method magikfan_code_file_analysis.is_return_line?(p_line)
 	## 
 	## Lines beginning with "_return"
 	# "    _return l_result".trim_spaces() -> "_return l_result".matches?("_return*")
-	
-	_return _false 
+	l_line << p_line.trim_spaces()
+	_return l_line.matches?("_return*")
 _endmethod
 $
 
