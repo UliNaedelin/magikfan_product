@@ -104,7 +104,7 @@ _method magikfan_code_file_analysis.write_methods_with_number_of_return_lines(_o
 	## Default value of P_MIN_NUMBER and P_MAX_NUMBER see comment
 	## of method methods_with_number_of_return_lines() 
 	## 
-	l_prop << _self.methods_with_number_of_return_lines(p_min_number)
+	l_prop << _self.methods_with_number_of_return_lines(p_min_number, p_max_number)
 	_self.write_methods_with_return_line(l_prop)
 _endmethod
 $
