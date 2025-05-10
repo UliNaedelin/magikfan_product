@@ -1,0 +1,82 @@
+#% text_encoding = iso8859_1
+_package sw
+
+_pragma(classify_level=restricted)
+def_slotted_exemplar(
+	:magik_exercise_check_4,
+	{
+	},
+	{})
+$
+
+_pragma(classify_level=restricted)
+_method magik_exercise_check_4.new()
+	## 
+	## 
+	_return _clone.init()
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_method magik_exercise_check_4.init()
+	## 
+	## 
+	_return _self 
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_method magik_exercise_check_4.test_run()
+	## 
+	##
+
+	l_max << magikfan_person.new("Max", "Mayer", date.from_ymd(1968, 3, 22))
+	l_julia << magikfan_person.new("Julia", "Faller")
+	l_felix << magikfan_person.new("Felix", "Burghammer", date.now().plus_days(-800))
+
+	l_ok? << l_julia.responds_to?(:surname)
+	write("Zugriff auf slot surname: ", l_ok?)
+	l_ok? << l_julia.responds_to?(:first_name)
+	write("Zugriff auf slot first_name: ", l_ok?)
+	l_ok? << l_julia.responds_to?(:birthdate)
+	write("Zugriff auf slot birthdate: ", l_ok?)
+	_if l_julia _is _unset
+	_then
+		write("Person constructor: problem in new() or init() method! Cancelling test.")
+		_return
+	_endif
+	l_ok? << _false
+	_try 
+		l_ok? << l_max.first_name = "Max" _andif
+			 l_max.surname = "Mayer" _andif
+			 l_max.birthdate = date.from_ymd(1968, 3, 22)
+	_when error
+	_endtry 
+	write("Slot values correctly set: ", l_ok?)
+
+	l_ok? << _false 
+	_try
+		l_ok? << l_julia.full_name() = "Julia Faller"
+	_when error
+	_endtry 
+	write("Method full_name(): ", l_ok?)
+	
+	l_ok? << l_julia.birthday_in_month??(10) _is _maybe _andif
+		 l_max.birthday_in_month??(3) _is _true _andif
+		 l_max.birthday_in_month??(4) _is _false
+	write("Method birthday_in_month??(): ", l_ok?)
+
+	l_ok? << l_julia.is_older_than??(l_max) _is _maybe _andif
+		 l_max.is_older_than??(l_julia) _is _maybe _andif
+		 l_max.is_older_than??(l_felix) _is _true _andif
+		 l_felix.is_older_than??(l_max) _is _false _andif
+		 l_felix.is_older_than??(l_felix) _is _maybe 
+	write("Method is_older_than??(): ", l_ok?)
+
+	l_ok? << l_julia.age() _is _unset _andif
+		 l_felix.age(l_max) = 2
+	write("Method age(): ", l_ok?)
+
+_endmethod
+$
+
