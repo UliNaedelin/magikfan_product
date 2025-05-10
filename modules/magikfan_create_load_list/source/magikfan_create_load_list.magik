@@ -66,7 +66,10 @@ _method magikfan_create_load_list.verify_load_list(p_directory,
 			_then
 				_leave
 			_endif
-		
+			_if l_line.trim_spaces().empty?
+			_then
+				_continue
+			_endif 
 			l_filename << system.pathname_from_components(l_line,
 								      p_directory)
 			_for i_extension _over {"",

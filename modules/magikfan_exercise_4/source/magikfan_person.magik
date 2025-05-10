@@ -1,0 +1,65 @@
+#% text_encoding = iso8859_1
+_package sw
+
+_pragma(classify_level=restricted)
+def_slotted_exemplar(
+	:magikfan_person,
+	{
+		{:first_name, _unset},
+		{:surname, _unset},
+		{:birthdate, _unset}
+	},
+	{})
+$
+
+_pragma(classify_level=basic)
+_method magikfan_person.new(p_first_name,
+			    p_surname,
+			    _optional p_birthdate)
+	## 
+	## Creates new instance of magikfan_person by using
+	## _clone. Slot values are passed to method init()
+	_return _clone
+_endmethod
+$
+
+
+
+_pragma(classify_level=basic)
+_method magikfan_person.full_name()
+	## 
+	## Returns first_name <space> surname
+
+_endmethod
+$
+
+_pragma(classify_level=basic)
+_method magikfan_person.birthday_in_month??(p_month_number)
+	## 
+	## Returns true if .birthdate is in month P_MONTH_NUMBER, else
+	## false. If .birthdate is unknown, return _maybe
+
+_endmethod
+$
+
+
+_pragma(classify_level=basic)
+_method magikfan_person.is_older_than??(p_person)
+	## 
+	## If own birthdate is bigger than P_PERSON birthdate, return
+	## true, if smaller return false. If birthdate is not set or
+	## equal, return maybe
+
+_endmethod
+$
+
+
+_pragma(classify_level=basic)
+_method magikfan_person.age()
+	## 
+	## Return todays age of person.
+	## year of today (date.now()) - year of birthdate
+	## 
+
+_endmethod
+$
