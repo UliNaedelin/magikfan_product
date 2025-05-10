@@ -12,6 +12,16 @@ def_slotted_exemplar(
 	{})
 $
 
+magikfan_person.define_slot_access(:surname, :readable)
+$
+
+magikfan_person.define_slot_access(:first_name, :readable)
+$
+
+magikfan_person.define_slot_access(:birthdate, :readable)
+$
+
+
 _pragma(classify_level=basic)
 _method magikfan_person.new(p_first_name,
 			    p_surname,
@@ -19,17 +29,31 @@ _method magikfan_person.new(p_first_name,
 	## 
 	## Creates new instance of magikfan_person by using
 	## _clone. Slot values are passed to method init()
-	_return _clone
+	_return _clone.init(p_first_name,
+			    p_surname,
+			    p_birthdate)
 _endmethod
 $
 
+_pragma(classify_level=basic)
+_private _method magikfan_person.init(p_first_name,
+				      p_surname,
+				      p_birthdate)
+	## 
+	## Set slot values
+	.first_name << p_first_name
+	.surname << p_surname
+	.birthdate << p_birthdate
+	_return _self 
+_endmethod
+$
 
 
 _pragma(classify_level=basic)
 _method magikfan_person.full_name()
 	## 
 	## Returns first_name <space> surname
-
+	_return .first_name + " " + .surname
 _endmethod
 $
 
@@ -38,7 +62,11 @@ _method magikfan_person.birthday_in_month??(p_month_number)
 	## 
 	## Returns true if .birthdate is in month P_MONTH_NUMBER, else
 	## false. If .birthdate is unknown, return _maybe
-
+	_if .birthdate _is _unset
+	_then
+		_return _maybe
+	_endif 
+	_return .birthdate.month_number = p_month_number
 _endmethod
 $
 
@@ -49,7 +77,14 @@ _method magikfan_person.is_older_than??(p_person)
 	## If own birthdate is bigger than P_PERSON birthdate, return
 	## true, if smaller return false. If birthdate is not set or
 	## equal, return maybe
-
+	_if (l_own_birthdate << .birthdate) _is _unset _orif
+	    (l_other_birthdate << p_person.birthdate) _is _unset _orif
+	    l_other_birthdate = l_own_birthdate
+	_then
+		_return _maybe
+	_else
+		_return l_own_birthdate < l_other_birthdate
+	_endif
 _endmethod
 $
 
@@ -60,6 +95,16 @@ _method magikfan_person.age()
 	## Return todays age of person.
 	## year of today (date.now()) - year of birthdate
 	## 
-
+	_if .birthdate _is _unset
+	_then
+		_return
+	_endif 
+	l_today << date.now()
+	l_result << l_today.year - .birthdate.year
+	_if l_today.day_of_year < .birthdate.day_of_year
+	_then
+		l_result -<< 1
+	_endif
+	_return l_result
 _endmethod
 $
