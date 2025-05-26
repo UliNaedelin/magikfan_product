@@ -1,0 +1,286 @@
+#% text_encoding = iso8859_1
+_package sw
+
+_pragma(classify_level=restricted)
+def_slotted_exemplar(
+	:magikfan_dataset_access,
+	{
+		{:dataset_name, _unset}
+	},
+	{:magikfan_collection_mixin})
+$
+
+_pragma(classify_level=basic)
+magikfan_dataset_access.define_shared_variable(
+	## Defines default number of records to be used for value
+	## retrieval 
+	:default_max_record_number,
+	200,
+	:public)
+$
+
+_pragma(classify_level=basic)
+_method magikfan_dataset_access.new(p_dataset_name)
+	## 
+	## Creates new instance of magikfan_dataset_access by using
+	## _clone. Slot values are passed to method init()
+	_return _clone.init(p_dataset_name)
+_endmethod
+$
+
+_pragma(classify_level=basic)
+_private _method magikfan_dataset_access.init(p_dataset_name)
+	## 
+	##
+	.dataset_name << p_dataset_name
+	_return _self 
+_endmethod
+$
+
+_pragma(classify_level=basic)
+_method magikfan_dataset_access.dataset()
+	## 
+	## Returns gis_ds_view instance for .dataset_name using
+	## gis_program_manager 
+	_return gis_program_manager.cached_dataset(.dataset_name.as_symbol())
+_endmethod
+$
+
+_pragma(classify_level=basic)
+_method magikfan_dataset_access.write_collection_with_record_number()
+	## 
+	## Outputs external table name with number of records to
+	## terminal using write() statement for each collection (table)
+	l_view << _self.dataset()
+	_if l_view _is _unset
+	_then
+		_return
+	_endif
+	_for i_coll _over _self.external_collections()
+	_loop
+		# write(<Externer Tabellenname>: <Anzahl Datensätze>)
+
+	_endloop 
+_endmethod
+$
+
+
+
+_pragma(classify_level=basic)
+_method magikfan_dataset_access.all_fields(_optional p_max_record_number)
+	## 
+	## Returns for all collections all fields with field
+	## properties and values.
+	##
+	## Impact of argument P_MAX_RECORD_NUMBER see method
+	## description of int!field_values_for()
+	l_prop << property_list.new()
+	l_prop[:dataset] << .dataset_name
+	l_prop[:collections] << concurrent_hash_map.new()
+	_for i_coll _over _self.external_collections()
+	_loop
+		l_coll_prop << concurrent_hash_map.new()
+		l_prop[:collections][i_coll.name] << l_coll_prop
+		l_coll_prop[:external_name] << i_coll.external_name
+		l_coll_prop[:name] << i_coll.name
+		l_coll_prop[:number_of_records] << i_coll.size
+		l_coll_prop[:fields] << concurrent_hash_map.new()
+		_for i_field _over i_coll.visible_fields.fast_elements()
+		_loop
+			l_field_prop << _self.field_info_for(i_field)
+			l_coll_prop[:fields][i_field.name] << l_field_prop
+			l_value_prop << _self.int!field_values_for(i_coll,
+								   i_field,
+								   p_max_record_number)
+			l_field_prop[:values] << l_value_prop
+			
+		_endloop 
+	_endloop
+	_return l_prop
+_endmethod
+$
+
+_pragma(classify_level=basic)
+_method magikfan_dataset_access.all_fields_as_json(p_file_name, _optional p_max_record_number)
+	## 
+	## Generates JSON file P_FILE_NAME with output of all_fields() 
+
+	l_json_encoder << json_encoder.new(_proc(p_element)
+						   _return _true, write_string(p_element)
+					   _endproc 
+				       )
+
+_endmethod
+$
+
+
+_pragma(classify_level=basic)
+_method magikfan_dataset_access.field_from_name(p_collection_name,
+						p_field_name)
+	##
+	## Returns collection in dataset. P_COLLECTION_NAME can be an
+	## internal or external collection name.
+	## 
+	l_coll << _self.collection_from_name(p_collection_name)
+	_if l_coll _is _unset
+	_then
+		_return
+	_endif
+	l_field << l_coll.field(p_field_name.as_symbol())
+	_if l_field _is _unset
+	_then
+		l_field << l_coll.field_for_external_name(p_field_name)
+	_endif
+	_return l_field	
+_endmethod
+$
+
+_pragma(classify_level=basic)
+_method magikfan_dataset_access.collection_from_name(p_collection_name)
+	## 
+	## Returns collection in dataset. P_COLLECTION_NAME can be an
+	## internal or external collection name. 
+	l_view << _self.dataset()
+	_if l_view _is _unset
+	_then
+		_return 
+	_endif
+	l_coll << l_view.collection(p_collection_name.as_symbol())
+	_if l_coll _is _unset
+	_then
+		l_coll << l_view.table_for_external_name(p_collection_name)
+	_endif
+	_return l_coll
+_endmethod
+$
+
+_pragma(classify_level=basic)
+_method magikfan_dataset_access.field_values_for(p_collection_name,
+						 p_field_name,
+						 _optional p_max_record_number
+				)
+	## Returns concurrent_hash_map with key = <field_value> and
+	## value = property_list[:count] << <number of that value>
+	##
+	## Method analyses up to P_MAX_RECORD_NUMBER records. If
+	## not specified variable default_max_record_number is used. 
+	l_coll << _self.collection_from_name(p_collection_name)
+	l_field << _self.field_from_name(p_collection_name, p_field_name)
+	_return _self.int!field_values_for(l_coll, l_field, p_max_record_number)
+_endmethod
+$
+
+
+_pragma(classify_level=basic)
+_private _method magikfan_dataset_access.int!field_values_for(p_collection,
+							      p_field,
+							      p_max_record_number)
+	## Returns concurrent_hash_map with key = <field_value> and
+	## value = property_list[:count] << <number of that value>
+	##
+	## Method analyses up to P_MAX_RECORD_NUMBER records. If
+	## not specified variable default_max_record_number is used. 
+	l_prop << concurrent_hash_map.new()
+	_if _not p_field.is_physical?
+	_then
+		_return l_prop
+	_endif 
+	l_max_record_number << p_max_record_number.default(_self.default_max_record_number)
+	l_total_count << 0
+	_for i_record _over p_collection.fast_elements()
+	_loop
+		_if l_total_count >= l_max_record_number
+		_then
+			_leave
+		_endif
+		l_value << i_record.perform(p_field.name)
+		_if l_value.class_name _is :unit_value
+		_then
+			l_value << l_value.value
+		_endif 
+		_if (l_value_prop << l_prop[l_value]) _is _unset
+		_then
+			l_value_prop << l_prop[l_value] << property_list.new_with(
+								   :count, 0)
+		_endif
+		l_value_prop[:count] +<< 1
+		l_total_count +<< 1
+	_endloop 
+	_return l_prop
+_endmethod
+$
+
+_pragma(classify_level=basic)
+_method magikfan_dataset_access.field_info_for(p_field)
+	## 
+	## Returns a property_list with properties of p_field.
+	## Properties vary by field type.
+	l_prop << property_list.new()
+	l_prop[:name] << p_field.name
+	l_prop[:external_name] << p_field.external_name
+	l_prop[:key?] << p_field.is_key?
+	l_prop[:mandatory?] << p_field.mandatory?
+	l_prop[:field_type] << p_field.class_name
+	_if p_field.is_physical?
+	_then
+		_self.add_physical_field_info(p_field, l_prop)
+	_elif p_field.is_join?
+	_then 
+		_self.add_join_field_info(p_field, l_prop)
+	_elif p_field.is_geometry?
+	_then
+		_self.add_geometry_field_info(p_field, l_prop)
+	_endif
+	_return l_prop
+_endmethod
+$
+
+_pragma(classify_level=basic)
+_private _method magikfan_dataset_access.add_physical_field_info(p_field, p_prop)
+	## 
+	## Specific parameters for fields of class sw_phys_field 
+	p_prop[:size] << p_field.type.size
+	_if (l_enumerator << p_field.type.enumerator) _isnt _unset
+	_then
+		p_prop[:enumerator_values] << simple_vector.new_from(l_enumerator.sorted_values)
+	_endif
+
+_endmethod
+$
+
+_pragma(classify_level=basic)
+_private _method magikfan_dataset_access.add_join_field_info(p_field, p_prop)
+	## 
+	## Specific parameters for fields of class sw_join_field 
+ 	p_prop[:simple_result?] << p_field.simple_result?
+	p_prop[:join_type] << p_field.join_type
+	_if (l_result_table << p_field.a_result_table) _isnt _unset
+	_then 
+		p_prop[:result_collection] << l_result_table.external_name
+	_endif 
+_endmethod
+$
+
+_pragma(classify_level=basic)
+_private _method magikfan_dataset_access.add_geometry_field_info(p_field, p_prop)
+	## 
+	## Specific parameters for fields of class sw_geom_field 
+	p_prop[:geom_type] << p_field.geom_type
+_endmethod
+$
+
+
+_pragma(classify_level=basic)
+_private _iter _method magikfan_dataset_access.external_collections()
+	## 
+	## Iterates over collection that are not internal collections
+	_for i_coll _over _self.dataset().collections.fast_elements()
+	_loop
+		_if _self.external_collection?(i_coll)
+		_then
+			_loopbody(i_coll)
+		_endif
+	_endloop 
+		
+_endmethod
+$

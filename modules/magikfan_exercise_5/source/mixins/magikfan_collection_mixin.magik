@@ -1,0 +1,24 @@
+#% text_encoding = iso8859_1
+_package sw
+
+_pragma(classify_level=restricted)
+def_mixin(
+	:magikfan_collection_mixin,
+	{})
+$
+
+_pragma(classify_level=restricted)
+_method magikfan_collection_mixin.external_collection?(p_collection)
+	## 
+	## Check if P_COLLECTION is an external collection by excluding
+	## internal prefixes. Only returns collections of class
+	## ds_collection 
+	_return p_collection.class_name _is :ds_collection _andif
+		_not (p_collection.name.matches?("sw_gis!*")) _andif
+		_not (p_collection.name.matches?("dd!*")) _andif
+		_not (p_collection.name.matches?("ex_dd!*")) _andif
+		_not (p_collection.name.matches?("sw_de!*")) _andif
+		_not (p_collection.name.matches?("swif!*")) _andif
+		_not (p_collection.name.matches?("int!*"))
+_endmethod
+$
