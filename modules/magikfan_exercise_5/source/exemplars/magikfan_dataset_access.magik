@@ -59,7 +59,7 @@ _method magikfan_dataset_access.write_collection_with_record_number()
 	_for i_coll _over _self.external_collections()
 	_loop
 		# write(<Externer Tabellenname>: <Anzahl Datensätze>)
-
+		write(i_coll.external_name, ": ", i_coll.size)
 	_endloop 
 _endmethod
 $
@@ -104,12 +104,16 @@ _pragma(classify_level=basic)
 _method magikfan_dataset_access.all_fields_as_json(p_file_name, _optional p_max_record_number)
 	## 
 	## Generates JSON file P_FILE_NAME with output of all_fields() 
-
+	l_prop << _self.all_fields(p_max_record_number)
+	_if system.file_exists?(p_file_name) 
+	_then
+		system.unlink(p_file_name)
+	_endif 
 	l_json_encoder << json_encoder.new(_proc(p_element)
 						   _return _true, write_string(p_element)
 					   _endproc 
 				       )
-
+	l_json_encoder.generate_file(l_prop, p_file_name, _true)
 _endmethod
 $
 
@@ -239,8 +243,12 @@ _pragma(classify_level=basic)
 _private _method magikfan_dataset_access.add_physical_field_info(p_field, p_prop)
 	## 
 	## Specific parameters for fields of class sw_phys_field 
-	
-
+	p_prop[:physical_type] << p_field.type.phys_type
+	p_prop[:size] << p_field.type.size
+	_if (l_enumerator << p_field.type.enumerator) _isnt _unset
+	_then
+		p_prop[:enumerator_values] << simple_vector.new_from(l_enumerator.sorted_values)
+	_endif
 _endmethod
 $
 
