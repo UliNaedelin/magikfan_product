@@ -239,11 +239,7 @@ _pragma(classify_level=basic)
 _private _method magikfan_dataset_access.add_physical_field_info(p_field, p_prop)
 	## 
 	## Specific parameters for fields of class sw_phys_field 
-	p_prop[:size] << p_field.type.size
-	_if (l_enumerator << p_field.type.enumerator) _isnt _unset
-	_then
-		p_prop[:enumerator_values] << simple_vector.new_from(l_enumerator.sorted_values)
-	_endif
+	
 
 _endmethod
 $
