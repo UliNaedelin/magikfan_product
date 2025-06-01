@@ -152,27 +152,20 @@ _private _method magikfan_difference_detector.write_csv_update_content(p_output,
 	_loop
 		_for i_field_name _over i_record.visible_field_names.fast_elements()
 		_loop
-			# ToDo Get value of current record and field name by using
-			# _self.record_value(). Store result in a variable.
-		
-			# ToDo Use i_position to retrieve corresponding base record and
-			# store it in variable
-
-			# ToDo Get value of base record and field name by using
-			# _self.record_value(). Store result in a variable.
-
-			# ToDo Replace below false value result of _self.field_value_different?()
-			_if _false
+			l_value << _self.record_value(i_record,
+						      i_field_name)
+			l_base_record << l_base_record_vec[i_position]
+			l_reference_value << _self.record_value(l_base_record,
+								i_field_name)
+			_if _self.field_value_different?(l_value, l_reference_value)
 			_then 
 				p_output.write(i_record.source_collection.external_name, ";",
 					       i_record.source_collection.name, ";",
 					       i_record.field(i_field_name).external_name, ";",
 					       i_field_name, ";",
 					       i_record.key_value().join_as_strings(", "), ";",
-					       # ToDo Add field value of base record using method
-					       # self.field_value_as_string() and add ; to the end
-					       # ToDo Add field value of current record using method
-					       # self.field_value_as_string() and add ; to the end
+					       _self.field_value_as_string(l_reference_value), ";",
+					       _self.field_value_as_string(l_value), ";",
 					       newline_char
 					 )
 			_endif
@@ -187,11 +180,8 @@ _private _method magikfan_difference_detector.compare_collection(p_collection_na
 	## 
 	## Uses a ds_difference_stream to compare changed, inserted or
 	## removed records of P_COLLECTION_NAME
-
-	# ToDo l_diff_stream shall be an instance of class
-	# ds_difference_stream by using method new_on(). Use slot
-	# base_view and current_view
-	l_diff_stream << _unset 
+	l_diff_stream << ds_difference_stream.new_on(.current_view.collection(p_collection_name),
+						     .base_view.collection(p_collection_name))
 	l_res_prop << property_list.new()
 	_if l_diff_stream _is _unset
 	_then
@@ -208,9 +198,10 @@ _private _method magikfan_difference_detector.compare_collection(p_collection_na
 			_endif
 			_if (l_value_prop << l_res_prop[l_change]) _is _unset
 			_then
-				# ToDo Create l_value_prop as property list with keys
-				# :current_record_vec and :base_record_vec.
-				# l_value_prop must be added to l_res_prop
+				l_value_prop << property_list.new_with(
+							:current_record_vec, rope.new(),
+							:base_record_vec, rope.new())
+				l_res_prop[l_change] << l_value_prop
 			_endif
 			l_value_prop[:current_record_vec].add(l_current_record)
 			l_value_prop[:base_record_vec].add(l_base_record)
@@ -278,27 +269,18 @@ _private _method magikfan_difference_detector.write_csv_content(p_output,
 		p_output.write(p_change, ";")
 		_for i_field_name _over i_record.visible_field_names.fast_elements()
 		_loop
-			# ToDo Get field value for current record and field name by using
-			# _self.record_value(). Store result in a variable.
-
-
-			# ToDo Replace empty string ("") in command below by converted field
-			# value. Use method _self.field_value_as_string()
-			p_output.write("", ";")
+			l_value << _self.record_value(i_record,
+						      i_field_name)
+			p_output.write(_self.field_value_as_string(l_value), ";")
 			_if l_base_record_vec _isnt _unset
 			_then
-				# ToDo Use i_position to retrieve corresponding base record and
-				# store it in variable
-
-				# ToDo Get field value for base record by using self.record_value()
-				# and store it as l_reference_value
-			
+				l_base_record << l_base_record_vec[i_position]
+				l_reference_value << _self.record_value(l_base_record,
+									i_field_name)
 			_else
 				l_reference_value << ""
-			_endif
-			# ToDo Replace empty string ("") in command below as previously with
-			# _self.field_value_as_string() using l_reference_value
-			p_output.write("", ";")
+			_endif 
+			p_output.write(_self.field_value_as_string(l_reference_value), ";")
 		_endloop
 		p_output.write(newline_char)
 	_endloop 
@@ -316,10 +298,8 @@ _private _method magikfan_difference_detector.write_csv_header(p_output, p_colle
 		
 	_for i_field _over p_collection.visible_fields.fast_elements()
 	_loop
-		# ToDo add to p_output the external name of the field, followed by a ;
-	
-		# ToDo add it again, but in front of external field name add
-		# "Referenz "
+		p_output.write(i_field.external_name, ";")
+		p_output.write("Referenz ", i_field.external_name, ";")
 	_endloop
 	p_output.write(newline_char)
 _endmethod
@@ -330,10 +310,8 @@ _pragma(classify_level=restricted)
 _private _method magikfan_difference_detector.record_value(p_record, p_field_name)
 	## 
 	## Method retrieves value of P_RECORDs field P_FIELD_NAME.
-	_try
-		# ToDo Replace "" by value of records field value
-		l_value << ""
-		l_value << l_value.default("")
+	_try 
+		l_value << p_record.perform(p_field_name).default("")
 	_when error
 		l_value << "error"
 	_endtry
