@@ -1,0 +1,416 @@
+#% text_encoding = iso8859_1
+_package sw
+
+_pragma(classify_level=restricted)
+def_slotted_exemplar(
+	:magikfan_difference_detector,
+	{
+		{:current_view, _unset},
+		{:base_view, _unset}
+	},
+	{:magikfan_collection_mixin})
+$
+
+
+_pragma(classify_level=restricted)
+_method magikfan_difference_detector.new(p_current_view,
+					 p_base_view)
+	## 
+	## Compare data of P_BASE_VIEW (likely to be a replicate view)
+	## with P_CURRENT_VIEW
+	_return _clone.init(p_current_view,
+			    p_base_view)
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_private _method magikfan_difference_detector.init(p_current_view,
+						   p_base_view)
+	## 
+	## 
+	.current_view << p_current_view
+	.base_view << p_base_view
+	_return _self 
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_method magikfan_difference_detector.write_changes()
+	## 
+	## Writes to terminal changes of all collections (number of
+	## insertions, updates and deletions for each collection) 
+	_for i_coll_name _over _self.collection_names()
+	_loop
+		_self.write_collection_changes(i_coll_name)
+	_endloop 
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_method magikfan_difference_detector.write_collection_changes(p_collection_name)
+	## 
+	## Writes changes of collection to terminal
+	l_change_prop << _self.compare_collection(p_collection_name)
+	_if l_change_prop.empty?
+	_then
+		_return
+	_endif 
+	write("Changes in collection ",
+	      .current_view.collection(p_collection_name).external_name)
+	_for i_change, i_value_prop _over l_change_prop.fast_keys_and_elements()
+	_loop
+		write(i_change, ": ", i_value_prop[:current_record_vec].size)
+	_endloop 
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_method magikfan_difference_detector.csv_export_changes(p_directory)
+	## 
+	## Writes in P_DIRECTORY for each collection a csv file
+	## containing data of inserted, updated and removed records.
+	_for i_coll_name _over _self.collection_names()
+	_loop
+		_self.csv_export_collection_changes(p_directory, i_coll_name)
+	_endloop 
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_method magikfan_difference_detector.csv_export_update_changes(p_file_name)
+	##
+	## Writes in file P_FILE_NAME (e.g. "c:\data\changes.csv") all
+	## changed data.
+	
+	l_output << external_text_output_stream.new(p_file_name)
+	_protect
+		l_output.write("External Collection; Internal Collection; External Field; Internal Field; Record ID; Old Value; New Value;", newline_char)
+		_for i_coll_name _over _self.collection_names()
+		_loop
+			_self.csv_export_collection_update_changes(l_output, i_coll_name)
+		_endloop
+	_protection
+		l_output.close()
+	_endprotect 	
+_endmethod
+$
+
+
+_pragma(classify_level=restricted)
+_method magikfan_difference_detector.csv_export_collection_changes(p_directory, p_collection_name)
+	## 
+	## Writes in P_DIRECTORY file <P_COLLECTION_NAME>.csv 
+	## containing data of inserted, updated and removed records.
+	l_change_prop << _self.compare_collection(p_collection_name)
+	_if l_change_prop.empty?
+	_then
+		_return
+	_endif
+	l_file_name << system.pathname_down(
+			       p_directory,
+			       write_string(p_collection_name, ".csv")
+			      )
+	l_output << external_text_output_stream.new(l_file_name)
+	_protect
+		l_coll << .current_view.collection(p_collection_name)
+		_self.write_csv_header(l_output, l_coll)
+		
+		_for i_change, i_value_prop _over l_change_prop.fast_keys_and_elements()
+		_loop
+			_self.write_csv_content(l_output, i_change, i_value_prop)
+		_endloop
+	_protection
+		l_output.close()
+	_endprotect 
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_private _method magikfan_difference_detector.csv_export_collection_update_changes(p_output, p_collection_name)
+	## 
+	## Searches for update changes and writes them to P_OUTPUT in
+	## csv structure.
+	l_change_prop << _self.compare_collection(p_collection_name)
+	_if (l_value_prop << l_change_prop[:update]) _is _unset 
+	_then
+		_return
+	_endif
+	_self.write_csv_update_content(p_output, l_value_prop)
+_endmethod
+$
+
+
+_pragma(classify_level=restricted)
+_private _method magikfan_difference_detector.write_csv_update_content(p_output, p_value_prop)
+	## 
+	## Writes update changes stored in P_VALUE_PROP to P_OUTPUT in
+	## csv structure. 
+	l_record_vec << p_value_prop[:current_record_vec]
+	l_base_record_vec << p_value_prop[:base_record_vec]
+
+	_for i_position, i_record _over l_record_vec.fast_keys_and_elements()
+	_loop
+		_for i_field_name _over i_record.visible_field_names.fast_elements()
+		_loop
+			# ToDo Get value of current record and field name by using
+			# _self.record_value(). Store result in a variable.
+		
+			# ToDo Use i_position to retrieve corresponding base record and
+			# store it in variable
+
+			# ToDo Get value of base record and field name by using
+			# _self.record_value(). Store result in a variable.
+
+			# ToDo Replace below false value result of _self.field_value_different?()
+			_if _false
+			_then 
+				p_output.write(i_record.source_collection.external_name, ";",
+					       i_record.source_collection.name, ";",
+					       i_record.field(i_field_name).external_name, ";",
+					       i_field_name, ";",
+					       i_record.key_value().join_as_strings(", "), ";",
+					       # ToDo Add field value of base record using method
+					       # self.field_value_as_string() and add ; to the end
+					       # ToDo Add field value of current record using method
+					       # self.field_value_as_string() and add ; to the end
+					       newline_char
+					 )
+			_endif
+		_endloop
+	_endloop 
+_endmethod
+$
+
+
+_pragma(classify_level=restricted)
+_private _method magikfan_difference_detector.compare_collection(p_collection_name)
+	## 
+	## Uses a ds_difference_stream to compare changed, inserted or
+	## removed records of P_COLLECTION_NAME
+
+	# ToDo l_diff_stream shall be an instance of class
+	# ds_difference_stream by using method new_on(). Use slot
+	# base_view and current_view
+	l_diff_stream << _unset 
+	l_res_prop << property_list.new()
+	_if l_diff_stream _is _unset
+	_then
+		_return l_res_prop
+	_endif 
+	_protect
+		_loop 
+			(l_change,
+			 l_current_record,
+			 l_base_record) << l_diff_stream.get()
+			_if l_change _is _unset
+			_then
+				_leave
+			_endif
+			_if (l_value_prop << l_res_prop[l_change]) _is _unset
+			_then
+				# ToDo Create l_value_prop as property list with keys
+				# :current_record_vec and :base_record_vec.
+				# l_value_prop must be added to l_res_prop
+			_endif
+			l_value_prop[:current_record_vec].add(l_current_record)
+			l_value_prop[:base_record_vec].add(l_base_record)
+		_endloop 
+	_protection
+		l_diff_stream.close()
+	_endprotect
+	_return l_res_prop
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_private _iter _method magikfan_difference_detector.collection_names()
+	## 
+	## Iterates over all external collections
+	_for i_coll _over .current_view.collections.fast_elements()
+	_loop
+		_if _self.external_collection?(i_coll)
+		_then 
+			_loopbody(i_coll.name)
+		_endif 
+	_endloop 
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_private _method magikfan_difference_detector.record_vec_for(p_change, p_value_prop)
+	## 
+	## Returns records to be documented for output
+	_if p_change _is :insert
+	_then
+		l_record_vec << p_value_prop[:current_record_vec]
+	_elif p_change _is :update
+	_then
+		l_record_vec << p_value_prop[:current_record_vec]
+		l_base_record_vec << p_value_prop[:base_record_vec]
+	_elif p_change _is :remove
+	_then
+		l_record_vec << p_value_prop[:base_record_vec]
+	_endif
+	_return l_record_vec, l_base_record_vec
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_private _method magikfan_difference_detector.write_csv_content(p_output,
+								p_change,
+								p_value_prop)
+	## 
+	## Writes content in P_VALUE_PROP to P_OUTPUT in CSV structure
+
+	# In case record has been changed l_base_record_vec contains
+	# previous versions of records in same order as current records
+	# is l_record_vec	
+	(l_record_vec,
+	 l_base_record_vec) << _self.record_vec_for(p_change, p_value_prop)
+	
+	_if l_record_vec _is _unset
+	_then 
+		_return 
+	_endif
+	
+	_for i_position, i_record _over l_record_vec.fast_keys_and_elements()
+	_loop
+		p_output.write(p_change, ";")
+		_for i_field_name _over i_record.visible_field_names.fast_elements()
+		_loop
+			# ToDo Get field value for current record and field name by using
+			# _self.record_value(). Store result in a variable.
+
+
+			# ToDo Replace empty string ("") in command below by converted field
+			# value. Use method _self.field_value_as_string()
+			p_output.write("", ";")
+			_if l_base_record_vec _isnt _unset
+			_then
+				# ToDo Use i_position to retrieve corresponding base record and
+				# store it in variable
+
+				# ToDo Get field value for base record by using self.record_value()
+				# and store it as l_reference_value
+			
+			_else
+				l_reference_value << ""
+			_endif
+			# ToDo Replace empty string ("") in command below as previously with
+			# _self.field_value_as_string() using l_reference_value
+			p_output.write("", ";")
+		_endloop
+		p_output.write(newline_char)
+	_endloop 
+_endmethod
+$
+
+
+_pragma(classify_level=restricted)
+_private _method magikfan_difference_detector.write_csv_header(p_output, p_collection)
+	## 
+	## Writes header of to P_OUTPUT. All visible fields of
+	## P_COLLECTION are used in header twice, one containing info
+	## of base view, the other of the current view.
+	p_output.write("Change;")
+		
+	_for i_field _over p_collection.visible_fields.fast_elements()
+	_loop
+		# ToDo add to p_output the external name of the field, followed by a ;
+	
+		# ToDo add it again, but in front of external field name add
+		# "Referenz "
+	_endloop
+	p_output.write(newline_char)
+_endmethod
+$
+
+
+_pragma(classify_level=restricted)
+_private _method magikfan_difference_detector.record_value(p_record, p_field_name)
+	## 
+	## Method retrieves value of P_RECORDs field P_FIELD_NAME.
+	_try
+		# ToDo Replace "" by value of records field value
+		l_value << ""
+		l_value << l_value.default("")
+	_when error
+		l_value << "error"
+	_endtry
+	_return l_value
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_private _method magikfan_difference_detector.field_value_different?(p_value, p_reference_value)
+	## 
+	## Method compares two entries and return true in case they are different. 
+	_if p_value.class_name ~= p_reference_value.class_name
+	_then
+		_return _true
+	_endif
+	_if p_value.class_name _is :db_set _orif
+	    p_value.class_name _is :db_rope _orif
+	    p_value.class_name _is :select_collection
+	_then
+		_if _not (p_value.size = p_reference_value.size)
+		_then
+			_return _true
+		_endif
+		_for i_value _over p_value.fast_elements()
+		_loop
+			_if _not p_reference_value.includes?(i_value)
+			_then
+				_for i_ref_rec _over p_reference_value.fast_elements()
+				_loop
+					_if i_ref_rec.key_value().join_as_strings("/") = i_value.key_value().join_as_strings("/")
+					_then
+						_leave
+					_endif
+				_finally
+					_return _true
+				_endloop 
+		
+			
+			_endif
+		_endloop
+		_return _false
+	_endif
+	_return _not (p_value = p_reference_value)
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_private _method magikfan_difference_detector.field_value_as_string(p_value)
+	## 
+	## Converts P_VALUE in a suitable string for CSV output.
+	##
+	## Assume floating numbers must be written with , float point character 
+	_dynamic !print_float_precision!
+	_dynamic !use_current_locale?!
+	_dynamic !current_locale!
+	!print_float_precision! << 9
+	!use_current_locale?! << _true
+	l_locale_prop << !current_locale!.copy()
+	l_locale_prop[:float_point_char] << %,
+	!current_locale! << l_locale_prop
+	
+	l_class << p_value.class_name
+	_if l_class _is :db_set _orif
+	    l_class _is :db_rope _orif
+	    l_class _is :select_collection
+	_then
+		l_result << ""
+		_for i_rec _over p_value.fast_elements()
+		_loop
+			_if _not l_result.empty?
+			_then
+				l_result +<< ", "
+			_endif 
+			l_result +<< i_rec.key_value().join_as_strings("/")
+		_endloop
+		_return l_result
+	_endif 
+	_return write_string(p_value)
+_endmethod
+$

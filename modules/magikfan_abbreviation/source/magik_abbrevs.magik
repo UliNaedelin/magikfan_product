@@ -114,12 +114,15 @@ $
 _pragma(classify_level=debug)
 _method smallworld_product.app()
 	##
-	## Returns Application with content filter
+	## Returns an application that has a map_manager
 
 	
 	_for i_app _over _self.applications.fast_elements()
 	_loop
-		_return i_app.get_service_provider(:map_manager)
+		_if i_app.get_service_provider(:map_manager) _isnt _unset
+		_then
+			_return i_app
+		_endif 
 	_endloop 
 _endmethod
 $

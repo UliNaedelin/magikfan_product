@@ -22,6 +22,7 @@ requires
 	magikfan_exercise_3
 	magikfan_exercise_4
 	magikfan_exercise_5
+	magikfan_exercise_6
 end
 
 hidden

@@ -1,0 +1,16 @@
+#% text_encoding = iso8859_1 
+
+magikfan_exercise_6	1
+
+description
+	MagikFan Exercise Part 6
+end
+
+requires
+	magikfan_exercise_5
+end
+
+
+
+
+
