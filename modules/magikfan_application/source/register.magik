@@ -1,0 +1,20 @@
+#% text_encoding = iso8859_1
+# ************************************************************
+#
+# (c) 2005-2010 General Electric Company. All Rights Reserved.
+#
+# ************************************************************
+_package user
+$
+
+smallworld_product.register_application(:magikfan_application,
+					:application,
+					:resource_module_name, :magikfan_application,
+					:html_help_file_name, "swafNRM",
+					:html_help_resource_module_name, :nrmb_help_resources,
+					:external_name, :external_name,
+					:description, :description,
+					#:soc_name, :gis,
+					:ace_name, :|NRM|
+			)
+$

@@ -73,13 +73,6 @@ _proc@edm()
 _endproc
 $
 
-_global ed <<
-_proc@ed(_optional app_name)
-	_return edm(app_name).current_embedded_editor
-_endproc
-$
-
-
 _global mm <<
 _proc@mapman()
 	ap << app()
@@ -194,5 +187,11 @@ _proc@reset_db_context()
 _endproc
 $
 
-
+_global devtools <<
+_proc@devtools()
+	l_dir << system.pathname_down(smallworld_product.product(:sw_core).directory, "modules", "sw_dev_tools")
+	smallworld_product.add_product(l_dir)
+	sw_module_manager.load_module(:dev_tools_application)
+_endproc
+$
 
