@@ -1,0 +1,16 @@
+#% text_encoding = iso8859_1 
+
+magikfan_application	1
+
+description
+	MagikFan Application
+end
+
+requires
+
+end
+
+
+
+
+
