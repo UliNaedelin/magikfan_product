@@ -36,9 +36,14 @@ _method magikfan_application_interaction.get_application()
 	l_application << smallworld_product.application(.application_name)
 	_if l_application _is _unset
 	_then
-		# Start application by using
-		# smallworld_product.application_definition() and application_definition.start()
-		# Do not forget to assign variable l_application with started application
+		l_app_def << smallworld_product.application_definition(.application_name)
+		_if l_app_def _is _unset
+		_then
+			write("Application ", .application_name, " not found.")
+			_return
+		_endif
+		l_app_def.start()
+		l_application << smallworld_product.application(.application_name)
 	_endif
 	_return l_application
 _endmethod
