@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 
 <gui base="nrm_swaf_professional_application.gui">
-
+ <toolbar name="magikfan_map_selection">
+   <action name="magikfan_map_selection.number_selection"/>
+   <action name="magikfan_map_selection.show_in_explorer"/>
+ </toolbar>
+ <dock name="top">
+   <toolbar name="magikfan_map_selection"/>
+ </dock>
 </gui>
 

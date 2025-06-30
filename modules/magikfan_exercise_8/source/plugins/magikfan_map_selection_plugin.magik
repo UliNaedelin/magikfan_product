@@ -12,4 +12,107 @@ def_slotted_exemplar(
 	{:plugin})
 $
 
+_pragma(classify_level=restricted)
+magikfan_map_selection_plugin.define_shared_constant(
+	## Plugin must get informed when geometries are selected on map
+	:databus_consumer_data_types,
+	{:map_selection},
+	:public
+			      )
+$
 
+_pragma(classify_level=restricted)
+_method magikfan_map_selection_plugin.init_actions()
+	## 
+	##
+	l_value_manager << numeric_value_manager.new(
+				   :integer?, _true				   
+						 )
+	_self.add_action(
+		sw_action.new(
+			:number_selection,
+			:caption, _self.message(:number_selection),
+			:engine, _self,	
+			:value_mgr, l_value_manager,
+			:toolbar_control, {:text_item,
+					   :display_length, 4},
+			:value, 0)
+	      )
+
+	_self.add_action(
+		sw_action.new(
+			:show_in_explorer,
+			:caption, _self.message(:show_in_explorer),
+			:image, {:show_in_explorer, :magikfan_exercise_8},
+			:engine, _self,
+			:action_message, :show_in_explorer|()|,
+			:toolbar_control, :image_button_item)
+	      )
+
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_method magikfan_map_selection_plugin.sw_databus_data_available(p_data_type, p_data)
+	## 
+	## 
+	_if p_data_type _is :map_selection
+	_then
+		_self.map_geometry_selection(p_data[2])
+	_endif 
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_method magikfan_map_selection_plugin.map_geometry_selection(p_geometry_selection)
+	## 
+	## Updates action number_selection to show number of geometries
+	## passed by P_GEOMETRY_SELECTION
+	l_geom_selection << p_data[2]
+	_self.action(:number_selection).value << l_geom_selection.size
+	_self.manage_actions()
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_method magikfan_map_selection_plugin.show_in_explorer()
+	## 
+	## Request selected geometries of map and display its records
+	## in the SW Explorer
+	(l_map, l_geom_set) << (_scatter _self.databus_request_data(:map_selection)) 
+	_self.make_geometry_set_available(l_geom_set, _true)
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_method magikfan_map_selection_plugin.make_geometry_set_available(p_geom_set, p_set_current?)
+	## 
+	## Transfer P_GEOM_SET, a geometry_set, into a rwo_set and show
+	## those records in the SW Explorer 
+	l_rwo_set << p_geom_set.rwo_set()
+	_self.databus_make_data_available(:rwo_set,
+					  {_self, l_rwo_set,
+					   :name, _self.message(:in_map_selected_records),
+					   :set_current?, p_set_current?})
+_endmethod
+$
+
+
+_pragma(classify_level=restricted)
+_method magikfan_map_selection_plugin.manage_actions()
+	## 
+	## Manages enable status of actions. Action :show_in_explorer
+	## must be disabled in case no geometry is selected.
+	l_action << _self.action(:number_selection)
+	_self.action(:show_in_explorer).enabled? << l_action.value > 0
+_endmethod
+$
+
+
+_pragma(classify_level=restricted)
+_method magikfan_map_selection_plugin.post_build_gui()
+	## 
+	## 
+	_self.manage_actions()
+_endmethod
+$
