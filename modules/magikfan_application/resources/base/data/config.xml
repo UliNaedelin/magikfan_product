@@ -2,7 +2,7 @@
 
 <config base="nrm_swaf_professional_application.config">
   <plugins>
-    
+    <plugin name="magikfan_map_selection" class_name="magikfan_map_selection_plugin"/>
   </plugins>
 </config>
 

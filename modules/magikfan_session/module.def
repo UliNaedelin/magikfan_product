@@ -23,7 +23,8 @@ requires
 	magikfan_exercise_4
 	magikfan_exercise_5
 	magikfan_exercise_6
-	magikfan_exercise_7	
+	magikfan_exercise_7
+	magikfan_exercise_8	
 end
 
 hidden
