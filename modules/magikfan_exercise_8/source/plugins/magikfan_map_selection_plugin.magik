@@ -1,0 +1,15 @@
+#% text_encoding = iso8859_1
+_package sw
+
+#remex(:magikfan_map_selection_plugin)
+#$
+
+_pragma(classify_level=restricted)
+def_slotted_exemplar(
+	:magikfan_map_selection_plugin,
+	{
+	},
+	{:plugin})
+$
+
+
