@@ -1,0 +1,3 @@
+globals
+magikfan_debug_method
+procedures

@@ -1,0 +1,108 @@
+#% text_encoding = iso8859_1
+_package sw
+
+#remex(:magikfan_test_code)
+#$
+
+_pragma(classify_level=restricted)
+def_slotted_exemplar(
+	:magikfan_test_code,
+	{
+		{:name, _unset},
+		{:age, _unset}
+	},
+	{})
+$
+
+_pragma(classify_level=restricted)
+_method magikfan_test_code.new(p_name, p_age)
+	## 
+	## 
+	_return _clone.init(p_name, p_age)
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_private _method magikfan_test_code.init(p_name, p_age)
+	## 
+	##
+	.name << p_name
+	.age << p_age
+	_return _self 
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_method magikfan_test_code.test_loop(p_number_vec, p_content_vec)
+	## 
+	## 
+	_for i_numb _over p_number_vec.fast_elements()
+	_loop
+		_for i _over range(1, i_numb - .age)
+		_loop
+			_for i_content _over p_content_vec.fast_elements()
+			_loop
+				write(.name + ": " + i_content)
+			_endloop 
+		_endloop
+	_endloop 
+_endmethod
+$
+
+
+_pragma(classify_level=restricted)
+_method magikfan_test_code.better_test_loop(p_number_vec, p_content_vec)
+	## 
+	##
+	_for i_content _over _self.number_range_content(p_number_vec, p_content_vec)
+	_loop
+		_self.output_content(i_content)
+	_endloop 
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_iter _method magikfan_test_code.number_range_content(p_number_vec, p_content_vec)
+	## 
+	## 
+	_for i_numb _over p_number_vec.fast_elements()
+	_loop
+		_for i_content _over _self.range_content(i_numb, p_content_vec)
+		_loop
+			_loopbody(i_content)
+		_endloop
+	_endloop 
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_iter _method magikfan_test_code.range_content(p_number, p_content_vec)
+	## 
+	## 
+	l_numb_range << _self.range_number(p_number)
+	_for i_range _over range(1, l_numb_range)
+	_loop
+		_for i_content _over p_content_vec.fast_elements()
+		_loop
+			_loopbody(i_content)
+		_endloop 
+	_endloop 
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_method magikfan_test_code.range_number(p_number)
+	## 
+	## 
+	_return p_number - .age
+_endmethod
+$
+
+
+_pragma(classify_level=restricted)
+_method magikfan_test_code.output_content(p_content)
+	## 
+	## 
+	write(.name + ": " + p_content)
+_endmethod
+$
