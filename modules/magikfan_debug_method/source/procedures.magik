@@ -8,12 +8,11 @@ _global debug_method <<
 	_endproc
 $
 
-_global remove_debug_method <<
+_global debug_remove_method <<
 	_proc(p_class, p_method_name)
 		magikfan_debug_method.remove_debug(p_class, p_method_name)
 	_endproc
 $
-
 
 _global debug_results_of <<
 	_proc(p_class, p_method_name)
