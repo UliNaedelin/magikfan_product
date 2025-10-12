@@ -26,8 +26,10 @@ _pragma(classify_level=restricted)
 _private _method magikfan_test_code.init(p_name, p_age)
 	## 
 	##
-	.name << p_name
-	.age << p_age
+	l_name << "".check_type(p_name)
+	l_age << integer.check_type(p_age)
+	.name << l_name
+	.age << l_age
 	_return _self 
 _endmethod
 $
