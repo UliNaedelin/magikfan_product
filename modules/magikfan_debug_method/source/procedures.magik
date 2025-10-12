@@ -3,39 +3,39 @@ _package sw
 
 
 _global debug_method <<
-	_proc(p_object, p_method_name, _optional p_with_traceback?)
-		magikfan_debug_method.debug(p_object, p_method_name, p_with_traceback?)
+	_proc(p_class, p_method_name, _optional p_with_traceback?)
+		magikfan_debug_method.debug(p_class, p_method_name, p_with_traceback?)
 	_endproc
 $
 
 _global remove_debug_method <<
-	_proc(p_object, p_method_name)
-		magikfan_debug_method.remove_debug(p_object, p_method_name)
+	_proc(p_class, p_method_name)
+		magikfan_debug_method.remove_debug(p_class, p_method_name)
 	_endproc
 $
 
 
 _global debug_results_of <<
-	_proc(p_object, p_method_name)
-		_return magikfan_debug_method.results_of(p_object, p_method_name)
+	_proc(p_class, p_method_name)
+		_return magikfan_debug_method.results_of(p_class, p_method_name)
 	_endproc
 $
 
 _global debug_reset_results_of <<
-	_proc(p_object, p_method_name)
-		magikfan_debug_method.reset_results_of(p_object, p_method_name)
+	_proc(p_class, p_method_name)
+		magikfan_debug_method.reset_results_of(p_class, p_method_name)
 	_endproc
 $
 
 _global debug_write_last_result_of <<
-	_proc(p_object, p_method_name)
-		magikfan_debug_method.write_last_result_of(p_object, p_method_name)
+	_proc(p_class, p_method_name)
+		magikfan_debug_method.write_last_result_of(p_class, p_method_name)
 	_endproc
 $
 
 _global debug_write_results_of <<
-	_proc(p_object, p_method_name)
-		magikfan_debug_method.write_results_of(p_object, p_method_name)
+	_proc(p_class, p_method_name)
+		magikfan_debug_method.write_results_of(p_class, p_method_name)
 	_endproc
 $
 
@@ -46,8 +46,8 @@ _global debug_reset_all_results <<
 $
 
 _global debug_write_summary_of <<
-	_proc(p_object, p_method_name)
-		magikfan_debug_method.write_summary_of(p_object, p_method_name)
+	_proc(p_class, p_method_name)
+		magikfan_debug_method.write_summary_of(p_class, p_method_name)
 	_endproc
 $
 
@@ -60,5 +60,11 @@ $
 _global debug_execute_call <<
 	_proc(p_entry_prop)
 		magikfan_debug_method.execute_call(p_entry_prop)
+	_endproc
+$
+
+_global debug_remove_all <<
+	_proc(_optional p_remove_results?)
+		magikfan_debug_method.remove_debug_all(p_remove_results?)
 	_endproc
 $
