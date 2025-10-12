@@ -1,0 +1,5 @@
+_package sw
+$
+
+_global !magikfan_debug_result_prop! << concurrent_hash_map.new()
+$

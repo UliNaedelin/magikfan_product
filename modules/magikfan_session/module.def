@@ -17,6 +17,7 @@ end
 
 requires
 	magikfan_create_load_list
+	magikfan_debug_method
 	magikfan_abbreviation
 	magikfan_exercise_2
 	magikfan_exercise_3
@@ -24,7 +25,8 @@ requires
 	magikfan_exercise_5
 	magikfan_exercise_6
 	magikfan_exercise_7
-	magikfan_exercise_8	
+	magikfan_exercise_8
+	magikfan_exercise_10	
 end
 
 hidden

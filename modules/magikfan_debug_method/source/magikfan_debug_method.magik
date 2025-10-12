@@ -1,0 +1,230 @@
+#% text_encoding = iso8859_1
+_package sw
+
+## Copyright GIT HydroS Consult GmbH
+## Author: Uli Naedelin, uli.naedelin@hydrosconsult.de
+
+_pragma(classify_level=restricted)
+##
+##
+def_slotted_exemplar(:magikfan_debug_method,
+        {
+	},
+	{})
+$
+
+
+_pragma(classify_level=restricted)
+_method magikfan_debug_method.debug(p_class, p_method, _optional p_with_traceback?)
+	##
+	## 
+	_local l_new_method
+	_local l_method_name
+	l_method_name << p_method.as_symbol()
+	_if (l_org_method << p_class.method(l_method_name)) _is _unset
+	_then
+		_return
+	_endif
+
+	l_new_method << :magikfan_debug! + l_method_name
+	_if (l_method_temp << p_class.method(l_new_method)) _is _unset _orif
+	    l_method_temp.owner.meta_at(:class_name) ~= p_class.class_name
+	_then
+		l_copy_proc << l_org_method.value.deep_copy()
+		l_copy_proc.name << l_new_method
+		p_class.define_method(
+			l_new_method,
+			l_copy_proc,
+			_false)
+		p_class.define_method(
+			l_method_name,
+			_proc(_gather p_args)
+				_import p_class
+				_import l_method_name
+				_import l_new_method
+				_import p_with_traceback?
+				l_intern_start << system.elapsed_seconds()
+				l_prop << property_list.new()
+				l_class_name << p_class.class_name
+				_if (l_class_prop << !magikfan_debug_result_prop![l_class_name]) _is _unset
+				_then
+					l_class_prop << !magikfan_debug_result_prop![l_class_name] << concurrent_hash_map.new()
+				_endif
+				_if (l_method_vec << l_class_prop[l_method_name]) _is _unset
+				_then
+					l_method_vec << l_class_prop[l_method_name] << rope.new()
+				_endif
+				l_method_vec.add(l_prop)
+				l_prop[:arguments] << p_args
+				l_prop[:start] << date_time.now(:milliseconds)
+				l_prop[:object] << _self
+				l_prop[:new_method] << l_new_method
+				_if p_with_traceback? _is _true
+				_then
+					!traceback!(!output!)
+				_endif 
+				l_res_vec << _allresults _self.perform(l_new_method, _scatter p_args)
+				l_prop[:results] << l_res_vec
+				l_prop[:duration] << system.elapsed_seconds() - l_intern_start
+			
+				_return _scatter l_res_vec
+			_endproc,
+			l_org_method.private?)
+	_endif 	
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_method magikfan_debug_method.remove_debug(p_class, p_method)
+	## 
+	## 
+	l_method_name << p_method.as_symbol()
+	_if (l_method_obj << p_class.method(l_method_name)) _is _unset _orif
+	    l_method_obj.owner.meta_at(:class_name) ~= p_class
+	_then
+		_return 
+	_endif
+	l_new_method << :magikfan_debug! + l_method_name
+	_if (l_method << p_class.method(l_new_method)) _isnt _unset _andif
+	    l_method.owner.meta_at(:class_name) = p_class
+	_then
+		l_copy_proc << l_method.value
+		l_copy_proc.name << l_method_name
+		p_class.define_method(
+			l_method_name,
+			l_copy_proc,
+			l_method_obj.private?
+			)
+		p_class.remove_method(l_new_method)
+	_endif
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_method magikfan_debug_method.results_of(p_class, p_method)
+	## 
+	## 
+	_if (l_class_prop << !magikfan_debug_result_prop![p_class.class_name]) _isnt _unset _andif
+	    (l_method_vec << l_class_prop[p_method.as_symbol()]) _isnt _unset
+	_then
+		_return l_method_vec
+	_endif 
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_method magikfan_debug_method.reset_results_of(p_class, p_method)
+	## 
+	## 
+	_if (l_method_vec << _self.results_of(p_class, p_method)) _isnt _unset 
+	_then
+		l_method_vec.empty()
+	_endif 
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_method magikfan_debug_method.write_last_result_of(p_class, p_method)
+	## 
+	## 
+	_if (l_vec << _self.results_of(p_class, p_method)) _isnt _unset _andif
+	    _not l_vec.empty?
+	_then
+		write("Last result of ", p_class.class_name, ".", p_method, ":")
+		_self.write_result_entry(l_vec.last)
+	_endif 
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_method magikfan_debug_method.write_results_of(p_class, p_method)
+	## 
+	## 
+	_if (l_vec << _self.results_of(p_class, p_method)) _isnt _unset 
+	_then
+		write(l_vec.size, " results of ", p_class.class_name, ".", p_method, ":")
+		l_count << 0
+		_for i_entry _over l_vec.fast_elements()
+		_loop
+			l_count +<< 1
+			write(l_count, " of ", l_vec.size, ":")
+			_self.write_result_entry(i_entry)
+		_endloop 
+	_endif 
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_method magikfan_debug_method.write_summary_of(p_class, p_method)
+	## 
+	## 
+	_if (l_vec << _self.results_of(p_class, p_method)) _isnt _unset 
+	_then
+		_self.write_summary_of_entry(p_class.class_name, p_method, l_vec)
+	_endif 
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_method magikfan_debug_method.write_summary_of_entry(p_class_name, p_method, p_res_vec)
+	## 
+	##
+	l_duration << 0
+	_for i_entry _over p_res_vec.fast_elements()
+	_loop
+		_if i_entry[:duration] _isnt _unset
+		_then 
+			l_duration +<< i_entry[:duration]
+		_endif 
+	_endloop 
+	write(p_class_name, ".", p_method, ": ", p_res_vec.size, " calls, total duration: ", l_duration )
+
+_endmethod
+$
+
+
+_pragma(classify_level=restricted)
+_method magikfan_debug_method.write_summary()
+	## 
+	## 
+	_for i_class, i_method_prop _over !magikfan_debug_result_prop!.fast_keys_and_elements()
+	_loop
+		_for i_method, i_res_vec _over i_method_prop.fast_keys_and_elements()
+		_loop
+			_self.write_summary_of_entry(i_class, i_method, i_res_vec)
+		_endloop 
+	_endloop 
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_method magikfan_debug_method.write_result_entry(p_prop)
+	## 
+	## 
+	write("Object", tab_char,  p_prop[:object])
+	write("Start", tab_char, p_prop[:start])
+	write("Duration", tab_char, p_prop[:duration])
+	write("Arguments:")
+	print(p_prop[:arguments])
+	write("Results:")
+	print(p_prop[:results])
+_endmethod
+$
+
+
+_pragma(classify_level=restricted)
+_method magikfan_debug_method.reset_all_results()
+	## 
+	##
+	!magikfan_debug_result_prop!.empty()
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_method magikfan_debug_method.execute_call(p_prop)
+	## 
+	##
+	print(p_prop[:results])
+	_return p_prop[:object].perform(p_prop[:new_method], _scatter p_prop[:arguments])
+_endmethod
+$
