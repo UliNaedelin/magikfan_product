@@ -105,6 +105,6 @@ _pragma(classify_level=restricted)
 _method magikfan_test_code.output_content(p_content)
 	## 
 	## 
-	write(.name + ": " + p_content)
+	write(.name, ": ", p_content)
 _endmethod
 $
