@@ -15,15 +15,21 @@ $
 
 
 _pragma(classify_level=restricted)
-_method magikfan_debug_method.debug(p_class, p_method, _optional p_with_traceback?)
+_method magikfan_debug_method.debug(p_class, p_method, _optional p_with_traceback?, p_overwrite_debug?)
 	##
 	## 
 	_local l_new_method
 	_local l_method_name
 	l_method_name << p_method.as_symbol()
-	_if (l_org_method << p_class.method(l_method_name)) _is _unset
+	_if (l_org_method << p_class.method(l_method_name)) _is _unset 
 	_then
-		_return
+		_if p_overwrite_debug? _isnt _true
+		_then
+			write(p_class.class_name, ".", p_method, " is already in debug mode. Use magikfan_debug_method.remove_debug() first.")
+			_true 
+		_else
+			write(p_class.class_name, ".", p_method, " is already in debug mode. Due to P_OVERWRITE_DEBUG? = _true debug method will be overwritten")
+		_endif 
 	_endif
 
 	l_new_method << :magikfan_debug! + l_method_name
@@ -99,6 +105,25 @@ _method magikfan_debug_method.remove_debug(p_class, p_method)
 	_endif
 _endmethod
 $
+_pragma(classify_level=restricted)
+_method magikfan_debug_method.remove_debug_all(_optional p_remove_results?)
+	## 
+	## 
+	_for i_class, i_method_prop _over !magikfan_debug_result_prop!.fast_keys_and_elements()
+	_loop
+		l_class << check_class(i_class)
+		_for i_method, i_res_vec _over i_method_prop.fast_keys_and_elements()
+		_loop
+			_self.remove_debug(l_class, i_method)
+		_endloop
+	_endloop
+	_if p_remove_results? _is _true
+	_then
+		!magikfan_debug_result_prop!.empty()
+	_endif 
+_endmethod
+$
+
 
 _pragma(classify_level=restricted)
 _method magikfan_debug_method.results_of(p_class, p_method)
@@ -216,7 +241,13 @@ _pragma(classify_level=restricted)
 _method magikfan_debug_method.reset_all_results()
 	## 
 	##
-	!magikfan_debug_result_prop!.empty()
+	_for i_class, i_method_prop _over !magikfan_debug_result_prop!.fast_keys_and_elements()
+	_loop
+		_for i_method, i_res_vec _over i_method_prop.fast_keys_and_elements()
+		_loop
+			i_res_vec.empty()
+		_endloop
+	_endloop 
 _endmethod
 $
 
