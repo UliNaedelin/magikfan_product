@@ -1,0 +1,66 @@
+#% text_encoding = iso8859_1
+_package sw
+
+#remex(:magikfan_content_report_access_example)
+#$
+
+
+_pragma(classify_level=restricted)
+def_slotted_exemplar(
+	:magikfan_content_report_access_example,
+	{
+		{:magik_report_object, _unset}
+	},
+	{})
+$
+
+_pragma(classify_level=restricted)
+_method magikfan_content_report_access_example.new(p_report_name, p_application)
+	## 
+	## 
+	_return _clone.init(p_report_name, p_application)
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_private _method magikfan_content_report_access_example.init(p_report_name, p_application)
+	## 
+	##
+	l_cr_plugin << p_application.plugin(:ghc_cr)
+	l_report << l_cr_plugin.report_from_name(p_report_name)
+	_if l_report _is _unset
+	_then
+		write("No report found with name ", p_report_name)
+	_else
+		.magik_report_object << l_cr_plugin.report_object_for_report(l_report)
+	_endif 
+	_return _self 
+_endmethod
+$
+
+_pragma(classify_level=restricted)
+_method magikfan_content_report_access_example.report_records_of_child_table(p_root_record, p_child_table_name)
+	## 
+	##
+	l_start_table << .magik_report_object.a_table()
+	l_record_object <<  l_start_table.record_object(p_root_record)
+
+	_return l_record_object.child_records(p_child_table_name)
+_endmethod
+$
+
+#_block
+#	l_station << gis_program_manager.cached_dataset(:strom).collection(:m_st_station).an_element()
+#	l_app << smallworld_product.applications.an_element()
+#	l_report_access << magikfan_content_report_access_example.new("NS Kabelabschnitte", l_app)
+#	l_magik_object_vec << l_report_access.report_records_of_child_table(l_station, "Netzw: ST NS-Kabelabschnitt, 5 km")
+#	write("Station ", l_station.stationsname, " hat folgende Kabelabschnitte:")
+#	_for i_magik_object _over l_magik_object_vec.fast_elements()
+#	_loop
+#		write(i_magik_object.ds_record().id, " (",
+#		      i_magik_object.value_for("Entfernung ST Station"), ")")     
+#	_endloop 
+#_endblock
+#$
+	
+	
